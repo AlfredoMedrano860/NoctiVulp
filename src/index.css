@@ -2919,20 +2919,24 @@ a:hover .moth--hover .moth__wing {
   transform-origin: bottom right;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(10px) scale(0.97);
+  clip-path: inset(100% -50% -50% -50%);
+  transform: translateY(6px);
   transition:
-    opacity 0.25s ease,
-    transform 0.35s var(--ease-out),
-    visibility 0s linear 0.35s;
+    clip-path 0.24s cubic-bezier(0.4, 0, 0.6, 1),
+    opacity 0.2s ease-in 0.04s,
+    transform 0.24s cubic-bezier(0.4, 0, 0.6, 1),
+    visibility 0s linear 0.28s;
 }
 
 .a11y-panel.is-open {
   opacity: 1;
   visibility: visible;
+  clip-path: inset(-50% -50% -50% -50%);
   transform: none;
   transition:
-    opacity 0.25s ease,
-    transform 0.35s var(--ease-out);
+    clip-path 0.38s var(--ease-out),
+    opacity 0.25s ease-out,
+    transform 0.38s var(--ease-out);
 }
 
 .a11y-panel__head {
@@ -3369,3 +3373,48 @@ html.big-cursor .cursor-ring {
   border-radius: 6px;
   background-color: rgba(255, 179, 71, 0.14);
 }
+/* animaciones del panel de accesibilidad */
+.a11y-panel__body {
+  transition: height 0.3s ease-out;
+}
+
+.a11y-panel__content {
+  animation: a11y-tab-in 0.32s var(--ease-out);
+}
+
+@keyframes a11y-tab-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--dir, 1) * 18px));
+  }
+}
+
+.a11y-tabs,
+.a11y-choices {
+  position: relative;
+  isolation: isolate;
+}
+
+.a11y-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  border-radius: 999px;
+  background: var(--amber);
+  pointer-events: none;
+}
+
+.is-ready > .a11y-indicator {
+  transition:
+    transform 0.5s var(--ease-out),
+    width 0.5s var(--ease-out),
+    height 0.5s var(--ease-out);
+}
+
+.a11y-tabs .a11y-pill.is-active,
+.a11y-choices .a11y-pill.is-active {
+  background: transparent;
+  border-color: transparent;
+}
+
