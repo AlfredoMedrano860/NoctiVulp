@@ -982,11 +982,11 @@ a:hover .moth--hover .moth__wing {
 /* ---------- proyectos (slider fijo) ---------- */
 .work {
   position: relative;
+  touch-action: pan-y;
 }
 
-.work__sticky {
-  position: sticky;
-  top: 0;
+.work__frame {
+  position: relative;
   height: 100vh;
   height: 100svh;
   overflow: hidden;
@@ -1209,6 +1209,7 @@ a:hover .moth--hover .moth__wing {
   background: var(--gradient);
   transform: scaleX(0);
   transform-origin: left;
+  transition: transform 0.6s var(--ease-out);
 }
 
 .work__loading {
@@ -2094,18 +2095,36 @@ a:hover .moth--hover .moth__wing {
   padding: 12px 14px;
 }
 
-.work__keys {
+.work__arrows {
+  display: flex;
+  gap: 8px;
   margin-left: auto;
   align-self: center;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--muted);
 }
 
-@media (pointer: coarse) {
-  .work__keys {
-    display: none;
-  }
+.work__arrow {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.work__arrow:hover {
+  background: var(--surface-hover);
+  border-color: var(--fire);
+}
+
+.work__arrow:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
 }
 
 .atmosphere {

@@ -1,10 +1,9 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties, type TouchEvent } from 'react'
 import type { Project } from '../data/projects'
 import type { ProjectArt } from '../hooks/useProjectArt'
 import { useLang, useT } from '../i18n'
-import { scrollToTarget, ScrollTrigger, useGSAP } from '../lib/motion'
 import { projectPath } from '../router'
-import { ArrowIcon, GithubIcon } from './Icons'
+import { ArrowIcon, GithubIcon, LineIcon } from './Icons'
 import { Link } from './Link'
 import { Magnetic } from './Magnetic'
 import { RollingText } from './RollingText'
@@ -20,165 +19,67 @@ const WorkCanvas = lazy(() => import('./WorkCanvas').then((m) => ({ default: m.W
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-// Alto de scroll por proyecto (en vh). Más bajo = se recorre más rápido.
-const VH_PER_PROJECT = 70
-
 interface WorkShowcaseProps {
   projects: Project[]
   art: ProjectArt
   live: boolean
 }
 
-// Sección fija: al hacer scroll se avanza proyecto por proyecto.
+// Carrusel de proyectos: botones, flechas del teclado y deslizar de lado en táctil.
 export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
   const t = useT()
   const lang = useLang()
   const sectionRef = useRef<HTMLElement>(null)
-  const progressRef = useRef<HTMLSpanElement>(null)
   const [view, setView] = useState({ index: 0, dir: 1 })
   const count = projects.length
   const dateFormat = new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' })
-  const activeRef = useRef(0)
-  const busyUntilRef = useRef(0)
 
-  const projectCenter = useCallback(
-    (i: number) => {
-      const section = sectionRef.current
-      if (!section || !count) return 0
-      const range = section.offsetHeight - window.innerHeight
-      return section.offsetTop + ((i + 0.5) / count) * range
+  const goTo = useCallback(
+    (i: number, dir?: number) => {
+      if (!count) return
+      const index = (i + count) % count
+      setView((prev) => (prev.index === index ? prev : { index, dir: dir ?? (index > prev.index ? 1 : -1) }))
     },
     [count],
   )
+  const step = useCallback((dir: number) => goTo(view.index + dir, dir), [goTo, view.index])
 
-  useGSAP(
-    () => {
-      const section = sectionRef.current
-      if (!section || !count) return
-      const indexAt = (progress: number) => Math.min(count - 1, Math.floor(progress * count))
-      const busy = () => performance.now() < busyUntilRef.current
-      let lastInput = -Infinity
-
-      const goTo = (i: number, duration = 0.8) => {
-        activeRef.current = i
-        busyUntilRef.current = performance.now() + duration * 1000 + 80
-        scrollToTarget(projectCenter(i), false, duration)
-      }
-      // Si se entra a la sección con inercia, se frena en el primer (o último) proyecto.
-      const catchMomentum = (i: number) => {
-        if (!busy() && performance.now() - lastInput < 1200) goTo(i, 0.6)
-      }
-
-      const trigger = ScrollTrigger.create({
-        trigger: section,
-        start: 'top top',
-        end: 'bottom bottom',
-        onEnter: () => catchMomentum(0),
-        onEnterBack: () => catchMomentum(count - 1),
-        onUpdate: (self) => {
-          const i = indexAt(self.progress)
-          if (!busy()) activeRef.current = i
-          if (progressRef.current) progressRef.current.style.transform = `scaleX(${self.progress})`
-          setView((prev) => (prev.index === i ? prev : { index: i, dir: i > prev.index ? 1 : -1 }))
-        },
-      })
-
-      const leaving = (dir: number) => (dir < 0 && activeRef.current === 0) || (dir > 0 && activeRef.current === count - 1)
-
-      // Rueda: un gesto (hasta que la rueda se detiene) = un proyecto.
-      let lastWheel = -Infinity
-      let released = false
-      const onWheel = (e: WheelEvent) => {
-        if (e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return
-        const now = performance.now()
-        const newGesture = now - lastWheel > 180
-        lastWheel = now
-        lastInput = now
-        const dir = e.deltaY > 0 ? 1 : -1
-        if (newGesture) released = trigger.isActive && !busy() && leaving(dir)
-        if (released || !trigger.isActive) return
-        e.preventDefault()
-        e.stopPropagation()
-        if (newGesture && !busy()) goTo(activeRef.current + dir)
-      }
-
-      // Táctil: se bloquea el scroll nativo y se avanza un proyecto al soltar.
-      let touchY = 0
-      let touchHeld = false
-      const onTouchStart = (e: TouchEvent) => {
-        touchY = e.touches[0].clientY
-        touchHeld = false
-      }
-      const onTouchMove = (e: TouchEvent) => {
-        lastInput = performance.now()
-        if (!trigger.isActive || e.touches.length > 1) return
-        const dy = touchY - e.touches[0].clientY
-        if (!touchHeld && (Math.abs(dy) < 6 || (!busy() && leaving(Math.sign(dy))))) return
-        touchHeld = true
-        if (e.cancelable) e.preventDefault()
-      }
-      const onTouchEnd = (e: TouchEvent) => {
-        lastInput = performance.now()
-        if (!touchHeld) return
-        touchHeld = false
-        const dy = touchY - e.changedTouches[0].clientY
-        if (Math.abs(dy) <= 40 || busy()) return
-        const target = Math.max(0, Math.min(count - 1, activeRef.current + Math.sign(dy)))
-        // Lenis frena su animación en cada evento táctil: el salto se lanza después.
-        busyUntilRef.current = performance.now() + 900
-        setTimeout(() => goTo(target), 0)
-      }
-
-      const opts = { capture: true, passive: false }
-      window.addEventListener('wheel', onWheel, opts)
-      window.addEventListener('touchstart', onTouchStart, { capture: true, passive: true })
-      window.addEventListener('touchmove', onTouchMove, opts)
-      window.addEventListener('touchend', onTouchEnd, { capture: true, passive: true })
-      return () => {
-        window.removeEventListener('wheel', onWheel, opts)
-        window.removeEventListener('touchstart', onTouchStart, { capture: true })
-        window.removeEventListener('touchmove', onTouchMove, opts)
-        window.removeEventListener('touchend', onTouchEnd, { capture: true })
-      }
-    },
-    { dependencies: [count, projectCenter], scope: sectionRef },
-  )
-
-  const jumpTo = useCallback(
-    (i: number) => {
-      if (!count) return
-      const target = Math.max(0, Math.min(count - 1, i))
-      activeRef.current = target
-      busyUntilRef.current = performance.now() + 1500
-      scrollToTarget(projectCenter(target))
-    },
-    [count, projectCenter],
-  )
-
-  // Flechas ← → (o J / K) para pasar de proyecto mientras la sección está en pantalla.
-  const indexRef = useRef(0)
-  useEffect(() => {
-    indexRef.current = view.index
-  }, [view.index])
+  // Flechas ← → (o J / K) mientras la sección está en pantalla.
   useEffect(() => {
     const section = sectionRef.current
     if (!section || !count) return
     let inView = false
     const io = new IntersectionObserver(([entry]) => (inView = entry.intersectionRatio > 0.5), { threshold: [0, 0.5, 1] })
-    io.observe(section.querySelector('.work__sticky') ?? section)
+    io.observe(section)
     const onKey = (e: KeyboardEvent) => {
       if (!inView || e.altKey || e.ctrlKey || e.metaKey) return
       const target = e.target as HTMLElement | null
       if (target?.closest('input, textarea, [contenteditable]')) return
-      if (e.key === 'ArrowRight' || e.key === 'j') jumpTo(indexRef.current + 1)
-      else if (e.key === 'ArrowLeft' || e.key === 'k') jumpTo(indexRef.current - 1)
+      if (e.key === 'ArrowRight' || e.key === 'j') step(1)
+      else if (e.key === 'ArrowLeft' || e.key === 'k') step(-1)
     }
     window.addEventListener('keydown', onKey)
     return () => {
       io.disconnect()
       window.removeEventListener('keydown', onKey)
     }
-  }, [count, jumpTo])
+  }, [count, step])
+
+  // Deslizar de lado cambia de proyecto; el scroll vertical sigue siendo el normal.
+  const touchRef = useRef<{ x: number; y: number } | null>(null)
+  const onTouchStart = (e: TouchEvent) => {
+    const touch = e.touches[0]
+    touchRef.current = e.touches.length === 1 ? { x: touch.clientX, y: touch.clientY } : null
+  }
+  const onTouchEnd = (e: TouchEvent) => {
+    const start = touchRef.current
+    touchRef.current = null
+    if (!start) return
+    const touch = e.changedTouches[0]
+    const dx = touch.clientX - start.x
+    const dy = touch.clientY - start.y
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1)
+  }
 
   // En una columna, el cuadro usa el alto que sobra para no montarse sobre el texto.
   const layoutRef = useRef<HTMLDivElement>(null)
@@ -226,9 +127,11 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
       data-scene="city"
       ref={sectionRef}
       className="work"
-      style={{ height: count ? `${count * VH_PER_PROJECT + 100}vh` : '100vh' }}
+      aria-roledescription="carousel"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
-      <div className="work__sticky">
+      <div className="work__frame">
         <MothLayer positions={[{ top: '14%', left: '52%' }, { top: '78%', left: '38%' }, { top: '30%', left: '4%' }]} />
         <div className="container work__layout" ref={layoutRef}>
           <header className="work__top">
@@ -314,7 +217,7 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
                   <button
                     key={p.name}
                     className={`work__nav-item ${i === view.index ? 'is-active' : ''}`}
-                    onClick={() => jumpTo(i)}
+                    onClick={() => goTo(i)}
                     aria-label={`${pad(i + 1)} · ${p.name}`}
                     aria-current={i === view.index ? 'true' : undefined}
                     data-cursor={p.name}
@@ -322,12 +225,17 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
                     {pad(i + 1)}
                   </button>
                 ))}
-                <span className="work__keys" aria-hidden="true">
-                  ← →
+                <span className="work__arrows">
+                  <button type="button" className="work__arrow" onClick={() => step(-1)} aria-label={t.project.prev}>
+                    <LineIcon name="left" size={18} />
+                  </button>
+                  <button type="button" className="work__arrow" onClick={() => step(1)} aria-label={t.project.next}>
+                    <LineIcon name="right" size={18} />
+                  </button>
                 </span>
               </nav>
               <div className="work__progress" aria-hidden="true">
-                <span ref={progressRef} />
+                <span style={{ transform: `scaleX(${(view.index + 1) / count})` }} />
               </div>
             </>
           ) : (

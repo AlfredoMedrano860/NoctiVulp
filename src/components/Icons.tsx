@@ -73,6 +73,8 @@ const LINE_ICONS = {
   page: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8ZM14 2v6h6M8 13h8M8 17h5',
   stop: 'M11 5 6 9H2v6h4l5 4ZM22 9l-6 6M16 9l6 6',
   close: 'M18 6 6 18M6 6l12 12',
+  left: 'm15 18-6-6 6-6',
+  right: 'm9 18 6-6-6-6',
 } as const
 
 export type LineIconName = keyof typeof LINE_ICONS
