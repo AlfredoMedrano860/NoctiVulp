@@ -20,8 +20,12 @@ export function Model() {
     <section id="modelo" className="section" data-scene="alley">
       <MothLayer positions={[{ top: '12%', left: '8%' }, { top: '58%', left: '92%' }, { top: '90%', left: '40%' }]} />
       <div className="container has-art">
-        <PaintedArt kind="lanterns" className="section-art section-art--right section-art--top" />
-        <div className="section__head">
+        <div className="garland" aria-hidden="true">
+          {[0, 1, 2, 3].map((i) => (
+            <PaintedArt key={i} kind="lanterns" className="garland__piece" />
+          ))}
+        </div>
+        <div className="section__head section__head--center">
           <p className="eyebrow">{t.model.eyebrow}</p>
           <SplitReveal as="h2" key={t.model.title[0]}>
             {t.model.title[0]}

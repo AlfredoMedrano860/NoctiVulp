@@ -125,8 +125,8 @@ function paintCrt(ctx: Ctx, rand: Rand) {
 
 function paintLanterns(ctx: Ctx, rand: Rand) {
   ctx.save()
-  ctx.strokeStyle = 'rgba(30, 14, 14, 0.95)'
-  ctx.lineWidth = 3
+  ctx.strokeStyle = 'rgba(176, 112, 78, 0.85)'
+  ctx.lineWidth = 4
   ctx.beginPath()
   ctx.moveTo(0, 60)
   ctx.quadraticCurveTo(300, 150, 600, 50)
@@ -141,7 +141,7 @@ function paintLanterns(ctx: Ctx, rand: Rand) {
   for (const l of lanterns) {
     const cy = l.top + 18 + l.h / 2
     glowSpot(ctx, l.x, cy, l.w * 1.4, l.color, 0.32)
-    ctx.fillStyle = '#1e0e0e'
+    ctx.fillStyle = 'rgba(176, 112, 78, 0.85)'
     ctx.fillRect(l.x - 1.5, l.top - 30, 3, 34)
     paintRegion(
       ctx,

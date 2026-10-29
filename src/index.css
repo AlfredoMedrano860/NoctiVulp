@@ -3735,6 +3735,57 @@ html.big-cursor .cursor-ring {
   }
 }
 
+/* modelo: encabezado centrado bajo los faroles */
+.section__head--center {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.section__head--center .section__lead {
+  margin-inline: auto;
+  max-width: 62ch;
+}
+
+.garland {
+  display: flex;
+  justify-content: center;
+  margin: -70px auto -60px;
+  pointer-events: none;
+}
+
+.garland__piece {
+  flex: 0 0 27.5%;
+  width: 27.5%;
+  margin-inline: -2.5%;
+  height: auto;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+.garland__piece.is-done {
+  opacity: 1;
+}
+
+.garland__piece:nth-child(even) {
+  transform: scaleX(-1);
+}
+
+@media (max-width: 760px) {
+  .garland {
+    margin: -40px -16px -30px;
+  }
+
+  .garland__piece {
+    flex-basis: 55%;
+    width: 55%;
+    margin-inline: -4.2%;
+  }
+
+  .garland__piece:nth-child(n + 3) {
+    display: none;
+  }
+}
+
 /* canales: título y letrero a un lado, monitores al otro */
 .channels {
   display: grid;
