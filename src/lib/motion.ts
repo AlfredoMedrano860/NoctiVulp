@@ -43,9 +43,11 @@ export function setLenis(instance: Lenis | null) {
   if (lenis && motionStopped) lenis.options.lerp = 1
 }
 
-export function scrollToTarget(target: string | number, immediate = false, duration = 1.4) {
+// travel: viaje largo (volver arriba, ir a una sección). Bloquea la rueda hasta llegar
+// para que la inercia no lo corte a mitad de camino.
+export function scrollToTarget(target: string | number, immediate = false, duration = 1.4, travel = false) {
   if (lenis) {
-    lenis.scrollTo(target, { offset: 0, immediate, duration })
+    lenis.scrollTo(target, { offset: 0, immediate, duration, lock: travel && !immediate })
     return
   }
   if (typeof target === 'number') window.scrollTo({ top: target })

@@ -18,7 +18,7 @@ export function BackToTop() {
     <button
       type="button"
       className={`to-top ${visible ? 'is-visible' : ''}`}
-      onClick={() => scrollToTarget(0, prefersReducedMotion())}
+      onClick={() => scrollToTarget(0, prefersReducedMotion(), 1.4, true)}
       aria-label={t.a11y.toTop}
       tabIndex={visible ? 0 : -1}
       aria-hidden={!visible}

@@ -45,7 +45,7 @@ function App() {
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       ScrollTrigger.refresh()
-      if (route.hash && document.getElementById(route.hash)) scrollToTarget(`#${route.hash}`)
+      if (route.hash && document.getElementById(route.hash)) scrollToTarget(`#${route.hash}`, false, 1.4, true)
       else scrollToTarget(0, true)
     })
     return () => cancelAnimationFrame(id)
