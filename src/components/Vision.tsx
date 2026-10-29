@@ -2,7 +2,6 @@ import { useT } from '../i18n'
 import { PaintedArt } from './PaintedArt'
 import { Reveal } from './Reveal'
 import { SplitReveal } from './SplitReveal'
-import { TiltCard } from './TiltCard'
 import { MothLayer } from './MothLayer'
 
 export function Vision() {
@@ -14,22 +13,22 @@ export function Vision() {
       <div className="container has-art">
         <PaintedArt kind="kitsune" className="section-art section-art--kitsune" />
         <div className="grid grid--2">
-          <TiltCard className="card statement">
+          <div className="statement">
             <p className="eyebrow">{t.vision.doLabel}</p>
             <SplitReveal as="p" className="statement__text" key={doText[0]}>
               {doText[0]}
               <em>{doText[1]}</em>
               {doText[2]}
             </SplitReveal>
-          </TiltCard>
-          <TiltCard className="card statement">
+          </div>
+          <div className="statement">
             <p className="eyebrow">{t.vision.goLabel}</p>
             <SplitReveal as="p" className="statement__text" delay={0.15} key={goText[0]}>
               {goText[0]}
               <em>{goText[1]}</em>
               {goText[2]}
             </SplitReveal>
-          </TiltCard>
+          </div>
         </div>
 
         <div className="grid grid--4 values">

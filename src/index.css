@@ -1661,10 +1661,6 @@ a:hover .moth--hover .moth__wing {
 }
 
 /* ---------- misión / visión ---------- */
-.statement {
-  padding: 40px;
-}
-
 .statement__text {
   font-family: var(--font-title);
   font-size: clamp(1.4rem, 2.6vw, 1.9rem);
@@ -3493,6 +3489,27 @@ html.big-cursor .cursor-ring {
 .tier--featured .tier__stub {
   background: linear-gradient(120deg, rgba(255, 179, 71, 0.16), rgba(230, 57, 70, 0.1));
   border-bottom-color: rgba(255, 179, 71, 0.45);
+}
+
+/* ---------- visión: citas, sin caja ---------- */
+.statement {
+  height: 100%;
+  padding: 4px 8px 8px 0;
+}
+
+.statement::before {
+  content: '“';
+  display: block;
+  height: 0.5em;
+  font-family: var(--font-title);
+  font-size: 5.5rem;
+  font-weight: 900;
+  line-height: 0.9;
+  color: var(--fire);
+}
+
+.statement .eyebrow {
+  margin-top: 18px;
 }
 
 /* animaciones del panel de accesibilidad */
