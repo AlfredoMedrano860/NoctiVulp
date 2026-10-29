@@ -39,8 +39,12 @@ export function Channels() {
             return (
               <Reveal key={c.name} delay={i * 120}>
                 <TiltCard className={`card channel channel--${c.accent}`}>
-                  <div className="channel__avatar">
-                    <MothLogo size={56} animated />
+                  <div className="channel__screen" aria-hidden="true">
+                    <span className="channel__ch">CH {String(i + 1).padStart(2, '0')}</span>
+                    <span className="channel__rec">REC</span>
+                    <div className="channel__avatar">
+                      <MothLogo size={56} animated />
+                    </div>
                   </div>
                   <p className="tier__kicker">{copy.role}</p>
                   <h3>{c.name}</h3>
