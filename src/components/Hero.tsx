@@ -1,13 +1,31 @@
 import { useEffect, useRef } from 'react'
 import { LINKS, PAINTED_BACKGROUND } from '../config'
 import type { Project } from '../data/projects'
-import { useT } from '../i18n'
+import { useLang, useT } from '../i18n'
+import { projectPath } from '../router'
+import { Link } from './Link'
 import { gsap, hasFinePointer, useGSAP } from '../lib/motion'
 import { ExternalButton } from './ExternalButton'
 import { GithubIcon, PatreonIcon, YoutubeIcon } from './Icons'
 import { Magnetic } from './Magnetic'
 import { MothLogo } from './MothLogo'
 import { SplitReveal } from './SplitReveal'
+
+const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
+  ['year', 31536000],
+  ['month', 2592000],
+  ['week', 604800],
+  ['day', 86400],
+  ['hour', 3600],
+  ['minute', 60],
+]
+
+function timeAgo(iso: string, lang: string) {
+  const seconds = (Date.parse(iso) - Date.now()) / 1000
+  const format = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' })
+  const [unit, size] = UNITS.find(([, s]) => Math.abs(seconds) >= s) ?? ['minute', 60]
+  return format.format(Math.round(seconds / size), unit)
+}
 
 interface HeroProps {
   projects: Project[]
@@ -18,7 +36,8 @@ export function Hero({ projects, ready }: HeroProps) {
   const t = useT()
   const rootRef = useRef<HTMLElement>(null)
   const artRef = useRef<HTMLDivElement>(null)
-  const languages = new Set(projects.map((p) => p.language).filter(Boolean)).size
+  const lang = useLang()
+  const latest = projects.reduce<Project | null>((a, p) => (!a || p.updatedAt > a.updatedAt ? p : a), null)
 
   // Entrada después del preloader + parallax al hacer scroll.
   useGSAP(
@@ -108,20 +127,17 @@ export function Hero({ projects, ready }: HeroProps) {
             </ExternalButton>
           </div>
 
-          <dl className="hero__stats" data-intro>
-            <div>
-              <dt>{t.hero.stats.repos}</dt>
-              <dd>{projects.length || '—'}</dd>
-            </div>
-            <div>
-              <dt>{t.hero.stats.languages}</dt>
-              <dd>{languages || '—'}</dd>
-            </div>
-            <div>
-              <dt>{t.hero.stats.open}</dt>
-              <dd>100%</dd>
-            </div>
-          </dl>
+          {latest && (
+            <p className="hero__log" data-intro>
+              <span className="dot dot--live" aria-hidden="true" />
+              {t.hero.log.updated} <time dateTime={latest.updatedAt}>{timeAgo(latest.updatedAt, lang)}</time> {t.hero.log.on}{' '}
+              <Link to={projectPath(lang, latest.name)}>{latest.name}</Link>
+              <span className="hero__log-sep" aria-hidden="true">
+                /
+              </span>
+              {projects.length} {t.hero.log.repos}
+            </p>
+          )}
         </div>
 
         <div ref={artRef} className="hero__art" aria-hidden="true">

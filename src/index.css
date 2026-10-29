@@ -794,27 +794,42 @@ a:hover .moth--hover .moth__wing {
   margin-top: 36px;
 }
 
-.hero__stats {
+.hero__log {
   display: flex;
-  gap: 40px;
-  margin: 48px 0 0;
-  padding-top: 28px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 44px 0 0;
+  padding-top: 22px;
   border-top: 1px solid var(--border);
-}
-
-.hero__stats dt {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  font-size: 0.8rem;
   color: var(--muted);
 }
 
-.hero__stats dd {
-  margin: 4px 0 0;
-  font-family: var(--font-title);
-  font-size: 2.2rem;
-  font-weight: 800;
+.hero__log .dot {
+  margin-right: 4px;
+}
+
+.hero__log time {
+  color: var(--text);
+}
+
+.hero__log a {
+  color: var(--amber);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 179, 71, 0.35);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.hero__log a:hover {
+  text-decoration-color: var(--amber);
+}
+
+.hero__log-sep {
+  margin: 0 4px;
+  opacity: 0.4;
 }
 
 .hero__art {
@@ -1772,6 +1787,12 @@ a:hover .moth--hover .moth__wing {
   margin-top: 32px;
 }
 
+@media (max-width: 760px) {
+  .cta {
+    padding: 56px 20px;
+  }
+}
+
 .footer__wordmark {
   margin-top: 48px;
   font-family: var(--font-title);
@@ -1910,22 +1931,6 @@ a:hover .moth--hover .moth__wing {
     grid-template-columns: 1fr;
   }
 
-  .hero__stats {
-    gap: 24px;
-  }
-
-  .hero__stats dd {
-    font-size: 1.7rem;
-  }
-
-  .statement,
-  .channel {
-    padding: 28px;
-  }
-
-  .cta {
-    padding: 56px 20px;
-  }
 
   .menu-btn {
     padding-left: 16px;

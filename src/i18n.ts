@@ -19,7 +19,7 @@ export interface Dict {
     title: Highlighted
     lead: string
     cta: string
-    stats: { repos: string; languages: string; open: string }
+    log: { updated: string; on: string; repos: string }
   }
   work: {
     eyebrow: string
@@ -135,7 +135,7 @@ const es: Dict = {
     title: ['Hago programas para que Linux se sienta ', 'menos raro', ''],
     lead: 'Herramientas chicas para quien viene de Windows y no quiere pelearse con la terminal, y otras más grandes para quien ya la usa a diario. Todo el código está en GitHub.',
     cta: 'Ver proyectos',
-    stats: { repos: 'Repositorios', languages: 'Lenguajes', open: 'Código abierto' },
+    log: { updated: 'Actualizado', on: 'en', repos: 'repos abiertos' },
   },
   work: {
     eyebrow: 'Proyectos',
@@ -308,7 +308,7 @@ const en: Dict = {
     title: ['I make software so Linux feels ', 'less weird', ''],
     lead: "Small tools for people coming from Windows who don't want to fight the terminal, and bigger ones for people who already live in it. All the code is on GitHub.",
     cta: 'See projects',
-    stats: { repos: 'Repositories', languages: 'Languages', open: 'Open source' },
+    log: { updated: 'Updated', on: 'on', repos: 'open repos' },
   },
   work: {
     eyebrow: 'Projects',
