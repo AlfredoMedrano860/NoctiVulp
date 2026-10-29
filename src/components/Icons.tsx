@@ -52,8 +52,8 @@ export function ChevronUpIcon({ size = 20 }: IconProps) {
 export function AccessibilityIcon({ size = 22 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="16" cy="4" r="1" />
-      <path d="m18 19 1-7-6 1M5 8l3-3 5.5 3-2.36 3.5M4.24 14.5a5 5 0 0 0 6.88 6M13.76 17.5a5 5 0 0 0-6.88-6" />
+      <circle cx="12" cy="4.5" r="1.6" fill="currentColor" stroke="none" />
+      <path d="M5 8.5 12 10l7-1.5M12 10v4.5M8.5 21l3.5-6.5 3.5 6.5" />
     </svg>
   )
 }
