@@ -19,9 +19,9 @@ export function Channels() {
   return (
     <section id="canales" className="section" data-scene="roof">
       <MothLayer positions={[{ top: '20%', left: '4%' }, { top: '80%', left: '62%' }, { top: '50%', left: '30%' }]} />
-      <div className="container has-art">
-        <PaintedArt kind="onair" className="section-art section-art--right" />
+      <div className="container channels">
         <div className="section__head">
+          <PaintedArt kind="onair" className="section-art section-art--inline" />
           <p className="eyebrow">{t.channels.eyebrow}</p>
           <SplitReveal as="h2" key={t.channels.title[0]}>
             {t.channels.title[0]}
@@ -33,7 +33,7 @@ export function Channels() {
           </SplitReveal>
         </div>
 
-        <div className="grid grid--2">
+        <div className="channels__list">
           {CHANNELS.map((c, i) => {
             const copy = t.channels.items[i]
             return (

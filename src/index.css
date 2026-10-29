@@ -3682,3 +3682,96 @@ html.big-cursor .cursor-ring {
   font-size: 0.82rem;
 }
 
+/* por qué linux: maestro y pila, como el layout de Hyprland */
+.tiles {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+}
+
+.tiles > :first-child {
+  grid-row: span 2;
+}
+
+.tiles > :first-child .reason__body {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 56px;
+}
+
+.tiles > :first-child h3 {
+  font-size: 1.9rem;
+  line-height: 1.1;
+}
+
+.tiles > :first-child .reason__body::after {
+  content: 'noctivulp@linux:~$ _';
+  position: absolute;
+  left: 24px;
+  bottom: 26px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: rgba(166, 154, 144, 0.55);
+}
+
+.tiles > :first-child .card-art {
+  order: 1;
+  float: none;
+  align-self: flex-end;
+  width: 150px;
+  margin: auto 0 0;
+}
+
+@media (max-width: 760px) {
+  .tiles {
+    grid-template-columns: 1fr;
+  }
+
+  .tiles > :first-child {
+    grid-row: auto;
+  }
+
+  .tiles > :first-child h3 {
+    font-size: 1.45rem;
+  }
+}
+
+/* canales: título y letrero a un lado, monitores al otro */
+.channels {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-items: start;
+  gap: 56px;
+}
+
+.channels .section__head {
+  position: sticky;
+  top: 120px;
+  margin-bottom: 0;
+}
+
+.section-art--inline {
+  position: relative;
+  display: block;
+  width: min(100%, 340px);
+  margin: -20px 0 24px -12px;
+}
+
+.channels__list {
+  display: grid;
+  gap: 20px;
+}
+
+@media (max-width: 960px) {
+  .channels {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .channels .section__head {
+    position: static;
+  }
+
+  .section-art--inline {
+    width: min(70vw, 300px);
+  }
+}
