@@ -137,6 +137,7 @@ code {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--amber);
+  text-shadow: 0 0 14px rgba(255, 140, 40, 0.55);
   margin-bottom: 16px;
 }
 
@@ -582,7 +583,7 @@ a:hover .moth--hover .moth__wing {
   inset: 0;
   background:
     radial-gradient(50% 60% at 80% 40%, rgba(255, 107, 0, 0.14), transparent 70%),
-    #0b0a09;
+    rgba(11, 9, 9, 0.94);
   clip-path: inset(0% 0% 100% 0%);
 }
 
@@ -747,29 +748,19 @@ a:hover .moth--hover .moth__wing {
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: -1;
+  z-index: 1;
 }
 
 .hero__glow {
   position: absolute;
   inset: 0;
-  z-index: -2;
+  z-index: -1;
   background:
     radial-gradient(60% 50% at 75% 45%, rgba(255, 107, 0, 0.22), transparent 70%),
-    radial-gradient(40% 40% at 15% 90%, rgba(230, 57, 70, 0.14), transparent 70%),
-    linear-gradient(180deg, #0d0d0d 0%, #120c09 60%, #0d0d0d 100%);
+    radial-gradient(40% 40% at 15% 90%, rgba(230, 57, 70, 0.14), transparent 70%);
 }
 
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 160px;
-  background: linear-gradient(to bottom, transparent, var(--bg));
-  z-index: -1;
-}
-
-.hero:not(.is-ready) [data-intro],
+.hero:not(.is-ready) [data-intro]:not(.hero__lead),
 .hero:not(.is-ready) .hero__art {
   opacity: 0;
 }
@@ -957,8 +948,11 @@ a:hover .moth--hover .moth__wing {
 .marquee {
   overflow: hidden;
   padding: 28px 0;
-  border-block: 1px solid var(--border);
-  background: var(--bg-2);
+  border-block: 1px solid rgba(255, 107, 0, 0.18);
+  background: linear-gradient(90deg, rgba(12, 8, 9, 0.75), rgba(40, 12, 14, 0.55), rgba(12, 8, 9, 0.75));
+  box-shadow:
+    0 -1px 24px -12px rgba(255, 107, 0, 0.5),
+    0 1px 24px -12px rgba(255, 107, 0, 0.5);
 }
 
 .marquee__track {
@@ -997,8 +991,8 @@ a:hover .moth--hover .moth__wing {
   height: 100svh;
   overflow: hidden;
   background:
-    radial-gradient(50% 50% at 70% 50%, rgba(255, 107, 0, 0.08), transparent 70%),
-    var(--bg);
+    radial-gradient(50% 50% at 70% 50%, rgba(255, 107, 0, 0.1), transparent 70%),
+    linear-gradient(90deg, rgba(10, 8, 8, 0.7), rgba(10, 8, 8, 0.25) 60%, rgba(10, 8, 8, 0.45));
 }
 
 .work__layout {
@@ -1021,9 +1015,11 @@ a:hover .moth--hover .moth__wing {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 
 .work__top .eyebrow {
+  min-width: 0;
   margin: 0;
 }
 
@@ -1036,6 +1032,11 @@ a:hover .moth--hover .moth__wing {
   font-size: 2.2rem;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.work__counter .roll {
+  flex-shrink: 0;
 }
 
 .work__counter > span:last-child {
@@ -1057,6 +1058,45 @@ a:hover .moth--hover .moth__wing {
   box-shadow: 0 40px 100px -40px rgba(255, 107, 0, 0.45);
 }
 
+.work__badges {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+  width: 104px;
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+.work__badge {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transform: translateY(8px) rotate(-12deg) scale(0.9);
+  transition:
+    opacity 0.5s ease,
+    transform 0.7s var(--ease-out);
+}
+
+.work__badge.is-done.is-active {
+  opacity: 0.95;
+  transform: rotate(-6deg);
+}
+
+.work__media:hover .work__badge.is-done.is-active {
+  transform: translateY(-4px) rotate(4deg) scale(1.06);
+}
+
+@media (max-width: 960px) {
+  .work__badges {
+    top: 10px;
+    right: 10px;
+    width: 72px;
+  }
+}
+
 .work-canvas,
 .work-canvas canvas,
 .work-canvas img {
@@ -1075,11 +1115,12 @@ a:hover .moth--hover .moth__wing {
   flex-direction: column;
   align-items: flex-start;
   gap: 18px;
+  container-type: inline-size;
 }
 
 .work__title {
-  width: 150%;
-  font-size: clamp(2.6rem, 6.4vw, 6rem);
+  width: 100%;
+  font-size: min(clamp(2.6rem, 6.4vw, 6rem), calc(100cqi / (var(--name-length, 10) * 0.56)));
   font-weight: 900;
   line-height: 0.95;
   letter-spacing: -0.04em;
@@ -1419,13 +1460,13 @@ a:hover .moth--hover .moth__wing {
 .section {
   position: relative;
   padding: 120px 0;
+  overflow-x: clip;
 }
 
 .section--alt {
   background:
-    radial-gradient(50% 60% at 50% 0%, rgba(255, 107, 0, 0.07), transparent 70%),
-    var(--bg-2);
-  border-block: 1px solid var(--border);
+    radial-gradient(50% 60% at 50% 0%, rgba(255, 107, 0, 0.08), transparent 70%),
+    linear-gradient(180deg, rgba(14, 8, 10, 0.25), rgba(30, 10, 14, 0.5) 50%, rgba(14, 8, 10, 0.25));
 }
 
 .section__head {
@@ -1783,6 +1824,8 @@ a:hover .moth--hover .moth__wing {
   letter-spacing: -0.05em;
   text-align: center;
   color: var(--fire);
+  mix-blend-mode: screen;
+  opacity: 0.92;
   white-space: nowrap;
 }
 
@@ -1830,6 +1873,10 @@ a:hover .moth--hover .moth__wing {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .grid--3 > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
   .callout {
     grid-template-columns: 1fr;
   }
@@ -1855,9 +1902,9 @@ a:hover .moth--hover .moth__wing {
   }
 
   .work__media {
-    max-height: 34vh;
-    width: auto;
-    justify-self: stretch;
+    width: min(100%, calc(42svh * 4 / 3));
+    max-height: none;
+    justify-self: center;
   }
 
   .work__info {
@@ -1867,7 +1914,7 @@ a:hover .moth--hover .moth__wing {
 
   .work__title {
     width: 100%;
-    font-size: clamp(2rem, 9vw, 3.4rem);
+    font-size: min(clamp(2rem, 9vw, 3.4rem), calc(100cqi / (var(--name-length, 10) * 0.56)));
     mix-blend-mode: normal;
   }
 
@@ -1936,7 +1983,7 @@ a:hover .moth--hover .moth__wing {
 
 @media (max-height: 700px) and (min-width: 961px) {
   .work__title {
-    font-size: clamp(2.2rem, 5vw, 4.4rem);
+    font-size: min(clamp(2.2rem, 5vw, 4.4rem), calc(100cqi / (var(--name-length, 10) * 0.56)));
   }
 }
 
@@ -2032,32 +2079,66 @@ a:hover .moth--hover .moth__wing {
   }
 }
 
-/* ---------- hero: ciudad pintada ---------- */
-.painted-city {
+.atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 75% 35%, rgba(255, 107, 0, 0.1), transparent 70%),
+    radial-gradient(50% 50% at 10% 90%, rgba(230, 57, 70, 0.08), transparent 70%),
+    var(--bg);
+}
+
+.atmosphere__layer {
   position: absolute;
   inset: 0;
-  z-index: -3;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  visibility: hidden;
   opacity: 0;
-  transition: opacity 1.8s ease;
+  transition: opacity 1.4s ease;
 }
 
-.painted-city.is-done {
+.atmosphere__layer.is-ready {
+  visibility: visible;
+  animation: atmo-in 1.8s ease both;
+}
+
+.atmosphere__layer--city.is-ready,
+.atmosphere[data-scene='alley'] .atmosphere__layer--alley.is-ready,
+.atmosphere[data-scene='roof'] .atmosphere__layer--roof.is-ready {
   opacity: 1;
+}
+
+.atmosphere__layer--crisp {
+  opacity: 1;
+  transition: none;
+}
+
+@keyframes atmo-in {
+  from {
+    filter: brightness(0);
+  }
+}
+
+.atmosphere__shade {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 40%, transparent 40%, rgba(8, 6, 7, 0.55) 100%);
 }
 
 /* oscurece el lado del texto para que se lea sobre la pintura */
 .hero--painted .hero__glow {
   background:
-    linear-gradient(90deg, rgba(13, 13, 13, 0.94) 0%, rgba(13, 13, 13, 0.72) 38%, rgba(13, 13, 13, 0.2) 72%, rgba(13, 13, 13, 0.35) 100%),
-    linear-gradient(180deg, rgba(13, 13, 13, 0.6) 0%, transparent 22%, transparent 70%, rgba(13, 13, 13, 0.9) 100%);
+    linear-gradient(90deg, rgba(13, 13, 13, 0.92) 0%, rgba(13, 13, 13, 0.68) 38%, rgba(13, 13, 13, 0.15) 72%, rgba(13, 13, 13, 0.3) 100%),
+    linear-gradient(180deg, rgba(13, 13, 13, 0.55) 0%, transparent 22%, transparent 75%, rgba(13, 13, 13, 0.35) 100%);
 }
 
 @media (max-width: 960px) {
   .hero--painted .hero__glow {
-    background: linear-gradient(180deg, rgba(13, 13, 13, 0.45) 0%, rgba(13, 13, 13, 0.78) 45%, rgba(13, 13, 13, 0.94) 100%);
+    background: linear-gradient(180deg, rgba(13, 13, 13, 0.4) 0%, rgba(13, 13, 13, 0.74) 45%, rgba(13, 13, 13, 0.6) 100%);
   }
 }
 
@@ -2445,4 +2526,259 @@ a:hover .moth--hover .moth__wing {
     width: 44px;
     height: 44px;
   }
+}
+
+.card,
+.cta,
+.readme,
+.pp-nav__link {
+  background:
+    repeating-linear-gradient(105deg, transparent 0 26px, rgba(255, 210, 170, 0.025) 26px 27px),
+    linear-gradient(160deg, rgba(48, 20, 20, 0.55), rgba(14, 10, 10, 0.78) 60%);
+  border: 1px solid rgba(255, 179, 71, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 220, 180, 0.07),
+    0 30px 60px -40px rgba(0, 0, 0, 0.9);
+}
+
+.card:hover,
+.pp-nav__link:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 220, 180, 0.1),
+    0 0 0 1px rgba(255, 107, 0, 0.25),
+    0 30px 70px -35px rgba(255, 107, 0, 0.45);
+}
+
+.tier--featured {
+  background:
+    repeating-linear-gradient(105deg, transparent 0 26px, rgba(255, 210, 170, 0.03) 26px 27px) padding-box,
+    linear-gradient(160deg, rgba(60, 22, 18, 0.75), rgba(16, 10, 10, 0.88) 60%) padding-box,
+    var(--gradient) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 30px 80px -40px rgba(255, 107, 0, 0.7);
+}
+
+.cta {
+  background:
+    radial-gradient(60% 100% at 50% 100%, rgba(255, 107, 0, 0.25), transparent 70%),
+    repeating-linear-gradient(105deg, transparent 0 26px, rgba(255, 210, 170, 0.025) 26px 27px),
+    linear-gradient(160deg, rgba(48, 20, 20, 0.55), rgba(14, 10, 10, 0.8) 60%);
+}
+
+.callout {
+  background:
+    repeating-linear-gradient(105deg, transparent 0 26px, rgba(255, 210, 170, 0.025) 26px 27px),
+    linear-gradient(120deg, rgba(90, 20, 26, 0.5), rgba(14, 10, 10, 0.8) 65%);
+}
+
+.chip:not(.chip--active) {
+  background: rgba(20, 12, 12, 0.7);
+}
+
+.index__list {
+  background: linear-gradient(90deg, rgba(10, 8, 8, 0.55), rgba(10, 8, 8, 0.2));
+}
+
+.reason__num {
+  filter: drop-shadow(0 0 14px rgba(255, 107, 0, 0.45));
+}
+
+.footer__bottom {
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 179, 71, 0.1);
+}
+
+.has-art {
+  position: relative;
+}
+
+.has-art > :not(.section-art) {
+  position: relative;
+  z-index: 1;
+}
+
+.section-art,
+.cta__lamp {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  height: auto;
+  opacity: 0;
+  transform: translateY(30px) scale(0.97);
+  transition:
+    opacity 1.4s ease,
+    transform 1.6s var(--ease-out);
+}
+
+.section-art.is-done,
+.cta__lamp.is-done {
+  opacity: 1;
+  transform: none;
+}
+
+.section-art--right {
+  top: -50px;
+  right: -24px;
+  width: min(34vw, 430px);
+}
+
+.section-art--top {
+  top: -96px;
+}
+
+.section-art--kitsune {
+  position: relative;
+  display: block;
+  width: min(60vw, 260px);
+  margin: -40px auto 12px;
+}
+
+.section-art--onair {
+  width: min(32vw, 420px);
+}
+
+.card-art {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 84px;
+  height: auto;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(10px) rotate(-6deg);
+  transition:
+    opacity 0.9s ease,
+    transform 1s var(--ease-out);
+}
+
+.card-art.is-done {
+  opacity: 0.95;
+  transform: rotate(-6deg);
+}
+
+.card:hover .card-art.is-done {
+  transform: translateY(-4px) rotate(3deg) scale(1.06);
+}
+
+.moth-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.drift-moth {
+  position: absolute;
+  width: 54px;
+  height: auto;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+.drift-moth.is-done {
+  opacity: 0.75;
+  animation: moth-drift 17s ease-in-out infinite alternate;
+}
+
+.drift-moth:nth-child(2).is-done {
+  width: 40px;
+  opacity: 0.55;
+  animation-duration: 21s;
+  animation-delay: -6s;
+}
+
+.drift-moth:nth-child(3).is-done {
+  width: 34px;
+  opacity: 0.45;
+  animation-duration: 25s;
+  animation-delay: -12s;
+}
+
+@keyframes moth-drift {
+  0% {
+    transform: translate(0, 0) rotate(-10deg);
+  }
+  30% {
+    transform: translate(34px, -26px) rotate(8deg);
+  }
+  65% {
+    transform: translate(-22px, -46px) rotate(-4deg);
+  }
+  100% {
+    transform: translate(16px, -12px) rotate(10deg);
+  }
+}
+
+@media (max-width: 960px) {
+  .card-art {
+    width: 68px;
+  }
+
+  .drift-moth:nth-child(3) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drift-moth.is-done {
+    animation: none;
+  }
+}
+
+.section-art--crt {
+  top: -110px;
+  width: min(26vw, 330px);
+}
+
+.cta {
+  position: relative;
+}
+
+.cta > :not(.cta__lamp) {
+  position: relative;
+  z-index: 1;
+}
+
+.cta__lamp {
+  left: 0;
+  bottom: 0;
+  width: auto;
+  height: 132%;
+}
+
+@media (max-width: 1100px) {
+  .cta__lamp {
+    height: 110%;
+    left: -40px;
+    opacity: 0;
+  }
+
+  .cta__lamp.is-done {
+    opacity: 0.55;
+  }
+}
+
+@media (max-width: 960px) {
+  .section-art,
+  .section-art--right,
+  .section-art--top,
+  .section-art--kitsune {
+    position: relative;
+    top: auto;
+    right: auto;
+    display: block;
+    width: min(72vw, 320px);
+    margin: -30px auto 8px;
+  }
+
+  .cta__lamp {
+    display: none;
+  }
+}
+
+[data-offscreen],
+[data-offscreen] *,
+[data-offscreen] *::before,
+[data-offscreen] *::after {
+  animation-play-state: paused !important;
 }

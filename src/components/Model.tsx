@@ -1,20 +1,26 @@
 import { LINKS } from '../config'
 import { useT } from '../i18n'
+import type { ArtKind } from '../lib/paint/sizes'
+import { MothLayer } from './MothLayer'
 import { ExternalButton } from './ExternalButton'
 import { PatreonIcon } from './Icons'
 import { Magnetic } from './Magnetic'
+import { PaintedArt } from './PaintedArt'
 import { Reveal } from './Reveal'
 import { SplitReveal } from './SplitReveal'
 import { TiltCard } from './TiltCard'
 
 // El nivel del medio (Patreon) es el destacado.
 const FEATURED = 1
+const TIER_ART: ArtKind[] = ['scroll', 'heart', 'wrench']
 
 export function Model() {
   const t = useT()
   return (
-    <section id="modelo" className="section">
-      <div className="container">
+    <section id="modelo" className="section" data-scene="alley">
+      <MothLayer positions={[{ top: '12%', left: '8%' }, { top: '58%', left: '92%' }, { top: '90%', left: '40%' }]} />
+      <div className="container has-art">
+        <PaintedArt kind="lanterns" className="section-art section-art--right section-art--top" />
         <div className="section__head">
           <p className="eyebrow">{t.model.eyebrow}</p>
           <SplitReveal as="h2" key={t.model.title[0]}>
@@ -31,6 +37,7 @@ export function Model() {
           {t.model.tiers.map((tier, i) => (
             <Reveal key={tier.name} delay={i * 120}>
               <TiltCard className={`card tier ${i === FEATURED ? 'tier--featured' : ''}`}>
+                <PaintedArt kind={TIER_ART[i % TIER_ART.length]} className="card-art" />
                 <p className="tier__kicker">{tier.kicker}</p>
                 <h3>{tier.name}</h3>
                 <ul>

@@ -1,12 +1,22 @@
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { SplitText } from 'gsap/SplitText'
+import type { SplitText } from 'gsap/SplitText'
 import { useGSAP } from '@gsap/react'
 import type Lenis from 'lenis'
 
-gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP)
+gsap.registerPlugin(ScrollTrigger, useGSAP)
 
-export { gsap, ScrollTrigger, SplitText, useGSAP }
+export { gsap, ScrollTrigger, useGSAP }
+
+let splitText: Promise<typeof SplitText> | null = null
+
+export function loadSplitText() {
+  splitText ??= import('gsap/SplitText').then((module) => {
+    gsap.registerPlugin(module.SplitText)
+    return module.SplitText
+  })
+  return splitText
+}
 
 export const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches

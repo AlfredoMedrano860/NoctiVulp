@@ -1,4 +1,4 @@
-import react from '@vitejs/plugin-react'
+import preact from '@preact/preset-vite'
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
@@ -24,7 +24,7 @@ function buildCsp(analyticsOrigin?: string) {
     "base-uri 'self'",
     "form-action 'none'",
     "frame-src 'none'",
-    "worker-src 'none'",
+    "worker-src 'self'",
   ].join('; ')
 }
 
@@ -276,7 +276,7 @@ export default defineConfig(({ mode }) => {
   const headers = buildHeaders(buildCsp(analytics ? new URL(analytics.src).origin : undefined))
 
   return {
-    plugins: [react(), screenshotsPlugin(), staticPagesPlugin(site, analytics)],
+    plugins: [preact(), screenshotsPlugin(), staticPagesPlugin(site, analytics)],
     // `npm run preview` sirve la build con las mismas cabeceras que producción
     preview: { headers },
   }

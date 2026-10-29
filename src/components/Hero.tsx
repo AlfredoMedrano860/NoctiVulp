@@ -7,8 +7,6 @@ import { ExternalButton } from './ExternalButton'
 import { GithubIcon, PatreonIcon, YoutubeIcon } from './Icons'
 import { Magnetic } from './Magnetic'
 import { MothLogo } from './MothLogo'
-import { PaintedCity } from './PaintedCity'
-import { RainCanvas } from './RainCanvas'
 import { SplitReveal } from './SplitReveal'
 
 interface HeroProps {
@@ -28,7 +26,8 @@ export function Hero({ projects, ready }: HeroProps) {
       if (!ready) return
       gsap
         .timeline({ delay: 0.25 })
-        .from('[data-intro]', { y: 30, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.08 })
+        .from('[data-intro]:not(.hero__lead)', { y: 30, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.08 })
+        .from('.hero__lead', { y: 30, duration: 1, ease: 'power3.out' }, 0.08)
         .from('.hero__art', { scale: 0.7, opacity: 0, duration: 1.6, ease: 'expo.out' }, 0)
 
       gsap.to('.hero__copy', {
@@ -39,12 +38,6 @@ export function Hero({ projects, ready }: HeroProps) {
       })
       gsap.to('.hero__art', {
         yPercent: 25,
-        ease: 'none',
-        scrollTrigger: { trigger: rootRef.current, start: 'top top', end: 'bottom top', scrub: true },
-      })
-      gsap.to('.painted-city', {
-        yPercent: 12,
-        scale: 1.08,
         ease: 'none',
         scrollTrigger: { trigger: rootRef.current, start: 'top top', end: 'bottom top', scrub: true },
       })
@@ -79,9 +72,7 @@ export function Hero({ projects, ready }: HeroProps) {
   }, [])
 
   return (
-    <section id="top" ref={rootRef} className={`hero ${ready ? 'is-ready' : ''} ${PAINTED_BACKGROUND ? 'hero--painted' : ''}`}>
-      {PAINTED_BACKGROUND && <PaintedCity />}
-      <RainCanvas />
+    <section id="top" data-scene="city" ref={rootRef} className={`hero ${ready ? 'is-ready' : ''} ${PAINTED_BACKGROUND ? 'hero--painted' : ''}`}>
       <div className="hero__glow" aria-hidden="true" />
 
       <div className="container hero__inner">

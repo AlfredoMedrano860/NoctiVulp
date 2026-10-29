@@ -73,13 +73,14 @@ export function RainCanvas() {
     })
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
       width = canvas.clientWidth
       height = canvas.clientHeight
+      const small = width < 760
+      const dpr = small ? 1 : Math.min(window.devicePixelRatio || 1, 1.5)
       canvas.width = width * dpr
       canvas.height = height * dpr
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      const density = Math.min(160, Math.round((width * height) / 10000))
+      const density = Math.min(160, Math.round((width * height) / (small ? 14000 : 10000)))
       drops = Array.from({ length: density }, () => newDrop(true))
       embers = Array.from({ length: Math.round(density / 5) }, () => newEmber(true))
       if (reduceMotion) draw()
@@ -108,6 +109,9 @@ export function RainCanvas() {
     }
 
     const step = (now: number) => {
+      frame = requestAnimationFrame(step)
+      const interval = window.scrollY < window.innerHeight && width >= 760 ? 0 : 1000 / 30
+      if (last && now - last < interval - 4) return
       // normaliza a 60 fps para que la velocidad no dependa de la pantalla
       const k = last ? Math.min((now - last) / 16.7, 3) : 1
       last = now
@@ -125,13 +129,13 @@ export function RainCanvas() {
         if (e.life >= 1 || e.y < -10) embers[i] = { ...newEmber(false), life: 0 }
       }
       draw()
-      frame = requestAnimationFrame(step)
     }
 
     // Solo anima cuando el hero se ve y la pestaña está activa.
     let inView = true
+    let started = false
     const sync = () => {
-      const shouldRun = inView && !document.hidden && !reduceMotion
+      const shouldRun = started && inView && !document.hidden && !reduceMotion
       cancelAnimationFrame(frame)
       if (shouldRun) {
         last = 0
@@ -149,7 +153,16 @@ export function RainCanvas() {
     ro.observe(canvas)
     resize()
 
+    const begin = () => {
+      started = true
+      sync()
+    }
+    const hasIdle = typeof requestIdleCallback === 'function'
+    const idle = hasIdle ? requestIdleCallback(begin, { timeout: 3000 }) : setTimeout(begin, 1500)
+
     return () => {
+      if (hasIdle) cancelIdleCallback(idle as number)
+      else clearTimeout(idle)
       cancelAnimationFrame(frame)
       io.disconnect()
       ro.disconnect()

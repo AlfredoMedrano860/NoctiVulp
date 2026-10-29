@@ -50,7 +50,7 @@ export const Header = forwardRef<HTMLButtonElement, HeaderProps>(function Header
             className="lang-btn"
             hrefLang={otherLang}
             lang={otherLang}
-            aria-label={otherLang === 'en' ? 'English' : 'Español'}
+            aria-label={`${t.header.otherLang}, ${otherLang === 'en' ? 'English' : 'Español'}`}
           >
             {t.header.otherLang}
           </Link>

@@ -201,6 +201,6 @@ export function toPreviewUrl(source: HTMLCanvasElement, scale = 0.5): Promise<st
   c.height = source.height * scale
   c.getContext('2d')?.drawImage(source, 0, 0, c.width, c.height)
   return new Promise((resolve) =>
-    c.toBlob((blob) => resolve(blob ? URL.createObjectURL(blob) : ''), 'image/jpeg', 0.82),
+    c.toBlob((blob) => resolve(blob ? URL.createObjectURL(blob) : ''), 'image/webp', 0.82),
   )
 }

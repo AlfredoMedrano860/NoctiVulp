@@ -1,11 +1,12 @@
 import { useRef } from 'react'
 import { LINKS } from '../config'
 import { useT } from '../i18n'
-import { gsap, SplitText, useGSAP } from '../lib/motion'
+import { gsap, loadSplitText, useGSAP } from '../lib/motion'
 import { ExternalButton } from './ExternalButton'
 import { GithubIcon, PatreonIcon, YoutubeIcon } from './Icons'
 import { Magnetic } from './Magnetic'
 import { MothLogo } from './MothLogo'
+import { PaintedArt } from './PaintedArt'
 import { SplitReveal } from './SplitReveal'
 
 const YEAR = new Date().getFullYear()
@@ -16,22 +17,32 @@ export function Footer() {
 
   // La marca gigante sube letra por letra al llegar al final.
   useGSAP(
-    () => {
-      const split = SplitText.create('.footer__wordmark', { type: 'chars', mask: 'chars' })
-      gsap.from(split.chars, {
-        yPercent: 110,
-        ease: 'power3.out',
-        stagger: 0.04,
-        scrollTrigger: { trigger: '.footer__wordmark', start: 'top 95%', end: 'bottom 85%', scrub: 0.6 },
+    (_context, contextSafe) => {
+      if (!contextSafe) return
+      let alive = true
+      const create = contextSafe((SplitText: Awaited<ReturnType<typeof loadSplitText>>) => {
+        if (!alive) return
+        const split = SplitText.create('.footer__wordmark', { type: 'chars', mask: 'chars' })
+        gsap.from(split.chars, {
+          yPercent: 110,
+          ease: 'power3.out',
+          stagger: 0.04,
+          scrollTrigger: { trigger: '.footer__wordmark', start: 'top 95%', end: 'bottom 85%', scrub: 0.6 },
+        })
       })
+      void loadSplitText().then(create)
+      return () => {
+        alive = false
+      }
     },
     { scope: rootRef },
   )
 
   return (
-    <footer ref={rootRef} className="footer">
+    <footer ref={rootRef} className="footer" data-scene="roof">
       <div className="container">
         <div className="cta">
+          <PaintedArt kind="lamp" className="cta__lamp" />
           <SplitReveal as="h2" key={t.footer.title[0]}>
             {t.footer.title[0]}
             <span className="text-gradient">{t.footer.title[1]}</span>

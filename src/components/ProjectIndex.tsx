@@ -48,7 +48,7 @@ export function ProjectIndex({ projects, artUrls }: ProjectIndexProps) {
   )
 
   return (
-    <section ref={sectionRef} className="section index">
+    <section ref={sectionRef} className="section index" data-scene="city">
       <div className="container">
         <div className="section__head">
           <p className="eyebrow">{t.index.eyebrow}</p>

@@ -3,9 +3,11 @@ import { useT } from '../i18n'
 import { ExternalButton } from './ExternalButton'
 import { YoutubeIcon } from './Icons'
 import { MothLogo } from './MothLogo'
+import { PaintedArt } from './PaintedArt'
 import { Reveal } from './Reveal'
 import { SplitReveal } from './SplitReveal'
 import { TiltCard } from './TiltCard'
+import { MothLayer } from './MothLayer'
 
 const CHANNELS = [
   { name: 'NoctiFox', href: LINKS.youtube, accent: 'fire' },
@@ -15,8 +17,10 @@ const CHANNELS = [
 export function Channels() {
   const t = useT()
   return (
-    <section id="canales" className="section">
-      <div className="container">
+    <section id="canales" className="section" data-scene="roof">
+      <MothLayer positions={[{ top: '20%', left: '4%' }, { top: '80%', left: '62%' }, { top: '50%', left: '30%' }]} />
+      <div className="container has-art">
+        <PaintedArt kind="onair" className="section-art section-art--right" />
         <div className="section__head">
           <p className="eyebrow">{t.channels.eyebrow}</p>
           <SplitReveal as="h2" key={t.channels.title[0]}>

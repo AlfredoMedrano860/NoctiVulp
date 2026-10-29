@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { Project } from '../data/projects'
 import type { ProjectArt } from '../hooks/useProjectArt'
 import { useLang, useT } from '../i18n'
@@ -8,6 +8,12 @@ import { ArrowIcon, GithubIcon } from './Icons'
 import { Link } from './Link'
 import { Magnetic } from './Magnetic'
 import { RollingText } from './RollingText'
+import type { Category } from '../data/projects'
+import type { ArtKind } from '../lib/paint/sizes'
+import { MothLayer } from './MothLayer'
+import { PaintedArt } from './PaintedArt'
+
+const CATEGORY_ART: Record<Category, ArtKind> = { linux: 'laptop', gaming: 'gamepad', apps: 'window', design: 'palette' }
 
 // Three.js pesa bastante: se carga aparte, cuando hace falta.
 const WorkCanvas = lazy(() => import('./WorkCanvas').then((m) => ({ default: m.WorkCanvas })))
@@ -87,8 +93,18 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
     }
   }, [count, jumpTo])
 
+  const [canvasReady, setCanvasReady] = useState(false)
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section || canvasReady) return
+    const io = new IntersectionObserver(([entry]) => entry.isIntersecting && setCanvasReady(true), { rootMargin: '0px 0px 150px 0px' })
+    io.observe(section)
+    return () => io.disconnect()
+  }, [canvasReady])
+
   const project = projects[view.index]
   const detail = project ? projectPath(lang, project.name) : '#'
+  const fallbackCover = art.urls[view.index] && <img className="work-canvas" src={art.urls[view.index]} alt="" />
 
   // Las estrellas solo se muestran si hay; si no, la licencia.
   const thirdMeta = project
@@ -102,11 +118,13 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
   return (
     <section
       id="proyectos"
+      data-scene="city"
       ref={sectionRef}
       className="work"
       style={{ height: count ? `${count * VH_PER_PROJECT + 100}vh` : '100vh' }}
     >
       <div className="work__sticky">
+        <MothLayer positions={[{ top: '14%', left: '52%' }, { top: '78%', left: '38%' }, { top: '30%', left: '4%' }]} />
         <div className="container work__layout">
           <header className="work__top">
             <p className="eyebrow">
@@ -124,16 +142,29 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
           {project ? (
             <>
               <Link to={detail} className="work__media" data-cursor={t.work.cursor} aria-label={`${t.work.viewProject}: ${project.name}`}>
-                <Suspense fallback={art.urls[view.index] && <img className="work-canvas" src={art.urls[view.index]} alt="" />}>
-                  <WorkCanvas arts={art.canvases} fallbackUrls={art.urls} index={view.index} />
-                </Suspense>
+                {canvasReady ? (
+                  <Suspense fallback={fallbackCover}>
+                    <WorkCanvas arts={art.canvases} fallbackUrls={art.urls} index={view.index} />
+                  </Suspense>
+                ) : (
+                  fallbackCover
+                )}
+                <span className="work__badges" aria-hidden="true">
+                  {(Object.keys(CATEGORY_ART) as Category[]).map((category) => (
+                    <PaintedArt
+                      key={category}
+                      kind={CATEGORY_ART[category]}
+                      className={`work__badge ${category === project.category ? 'is-active' : ''}`}
+                    />
+                  ))}
+                </span>
               </Link>
 
               <div className="work__info">
                 <span className="tag">
                   <RollingText text={t.categories[project.category]} direction={view.dir} />
                 </span>
-                <h2 className="work__title">
+                <h2 className="work__title" style={{ '--name-length': project.name.length } as CSSProperties}>
                   <RollingText text={project.name} direction={view.dir} />
                 </h2>
                 <p className="work__desc">
@@ -179,7 +210,7 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
                     key={p.name}
                     className={`work__nav-item ${i === view.index ? 'is-active' : ''}`}
                     onClick={() => jumpTo(i)}
-                    aria-label={p.name}
+                    aria-label={`${pad(i + 1)} · ${p.name}`}
                     aria-current={i === view.index ? 'true' : undefined}
                     data-cursor={p.name}
                   >
