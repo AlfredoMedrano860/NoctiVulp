@@ -1092,7 +1092,7 @@ a:hover .moth--hover .moth__wing {
   border-radius: 22px;
   overflow: hidden;
   border: 1px solid var(--border);
-  box-shadow: 0 40px 100px -40px rgba(255, 107, 0, 0.45);
+  box-shadow: 0 40px 90px -45px rgba(0, 0, 0, 0.9);
 }
 
 .work__badges {
@@ -1646,7 +1646,6 @@ a:hover .moth--hover .moth__wing {
   width: 12px;
   height: 2px;
   background: var(--fire);
-  box-shadow: 0 0 8px var(--fire);
 }
 
 .tier .magnetic {
@@ -2286,7 +2285,7 @@ a:hover .moth--hover .moth__wing {
   border-radius: 22px;
   border: 1px solid var(--border);
   background: var(--bg-2);
-  box-shadow: 0 40px 100px -40px rgba(255, 107, 0, 0.45);
+  box-shadow: 0 40px 90px -45px rgba(0, 0, 0, 0.9);
 }
 
 .pp-hero__media img,
@@ -2576,7 +2575,7 @@ a:hover .moth--hover .moth__wing {
   box-shadow:
     inset 0 1px 0 rgba(255, 220, 180, 0.1),
     0 0 0 1px rgba(255, 107, 0, 0.25),
-    0 30px 70px -35px rgba(255, 107, 0, 0.45);
+    0 30px 70px -35px rgba(0, 0, 0, 0.9);
 }
 
 .tier--featured {
@@ -3661,6 +3660,18 @@ html.big-cursor .cursor-ring {
 .a11y-choices .a11y-pill.is-active {
   background: transparent;
   border-color: transparent;
+}
+
+/* ---------- composición: cada sección con su propio orden ---------- */
+
+/* el degradado queda solo para el título del hero */
+.section .text-gradient {
+  background: none;
+  color: inherit;
+}
+
+.eyebrow {
+  text-shadow: none;
 }
 
 /* etiquetas de sección como rutas de terminal */
