@@ -140,7 +140,7 @@ const es: Dict = {
     githubProfile: 'Abrir mi perfil de GitHub',
   },
   work: {
-    eyebrow: 'Proyectos',
+    eyebrow: '~/proyectos',
     live: 'en vivo desde GitHub',
     offline: 'vista sin conexión',
     loading: 'Cargando proyectos…',
@@ -152,10 +152,10 @@ const es: Dict = {
     cursor: 'Ver',
     navLabel: 'Ir a un proyecto',
   },
-  index: { eyebrow: 'Índice', title: ['Todos los ', 'repositorios', ''], filterLabel: 'Filtrar proyectos', all: 'Todos' },
+  index: { eyebrow: '~/repos', title: ['Todos los ', 'repositorios', ''], filterLabel: 'Filtrar proyectos', all: 'Todos' },
   categories: { linux: 'Escritorio Linux', gaming: 'Gaming y modding', apps: 'Apps', design: 'Diseño' },
   why: {
-    eyebrow: 'Por qué Linux',
+    eyebrow: '~/por-que-linux',
     title: ['Cada vez más gente ', 'se cambia', ''],
     lead: 'Y no solo gente que programa. Estos son los motivos que más se repiten:',
     reasons: [
@@ -174,7 +174,7 @@ const es: Dict = {
     ],
   },
   model: {
-    eyebrow: 'Modelo',
+    eyebrow: '~/como-se-paga',
     title: ['¿Cómo se ', 'paga', ' esto?'],
     lead: 'El código es libre: puedes leerlo, compilarlo o hacerle un fork para uso no comercial, siempre que digas de dónde salió. Lo que está en Patreon es el programa ya compilado y listo para instalar.',
     tiers: [
@@ -211,7 +211,7 @@ const es: Dict = {
     ],
   },
   channels: {
-    eyebrow: 'Canales',
+    eyebrow: '~/canales',
     title: ['También en ', 'YouTube', ''],
     lead: 'Son dos canales: uno para ver cómo se hacen los programas y otro para jugar. Más adelante quiero hacer streams, y quizá llegar a Bilibili.',
     items: [
@@ -314,7 +314,7 @@ const en: Dict = {
     githubProfile: 'Open my GitHub profile',
   },
   work: {
-    eyebrow: 'Projects',
+    eyebrow: '~/projects',
     live: 'live from GitHub',
     offline: 'offline view',
     loading: 'Loading projects…',
@@ -326,10 +326,10 @@ const en: Dict = {
     cursor: 'View',
     navLabel: 'Go to a project',
   },
-  index: { eyebrow: 'Index', title: ['All the ', 'repositories', ''], filterLabel: 'Filter projects', all: 'All' },
+  index: { eyebrow: '~/repos', title: ['All the ', 'repositories', ''], filterLabel: 'Filter projects', all: 'All' },
   categories: { linux: 'Linux desktop', gaming: 'Gaming & modding', apps: 'Apps', design: 'Design' },
   why: {
-    eyebrow: 'Why Linux',
+    eyebrow: '~/why-linux',
     title: ['More and more people ', 'are switching', ''],
     lead: 'And not just people who code. These are the reasons that keep coming up:',
     reasons: [
@@ -348,7 +348,7 @@ const en: Dict = {
     ],
   },
   model: {
-    eyebrow: 'Model',
+    eyebrow: '~/pricing',
     title: ['How does this ', 'get paid', '?'],
     lead: "The code is free: you can read it, build it or fork it for non-commercial use, as long as you credit where it came from. What's on Patreon is the ready-to-install build.",
     tiers: [
@@ -385,7 +385,7 @@ const en: Dict = {
     ],
   },
   channels: {
-    eyebrow: 'Channels',
+    eyebrow: '~/channels',
     title: ['Also on ', 'YouTube', ''],
     lead: 'Two channels: one to watch the software get made and one to play. Later on I want to stream, and maybe reach Bilibili.',
     items: [
