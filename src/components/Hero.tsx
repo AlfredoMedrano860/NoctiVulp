@@ -140,13 +140,15 @@ export function Hero({ projects, ready }: HeroProps) {
           )}
         </div>
 
-        <div ref={artRef} className="hero__art" aria-hidden="true">
-          <div className="hero__orbit" />
-          <div className="hero__orbit hero__orbit--2" />
+        <div ref={artRef} className="hero__art">
+          <div className="hero__orbit" aria-hidden="true" />
+          <div className="hero__orbit hero__orbit--2" aria-hidden="true" />
           <MothLogo size={260} animated className="hero__moth" />
-          <code className="hero__term">
-            <span className="text-muted">$</span> git clone noctivulp-ch<span className="caret" />
-          </code>
+          <a className="hero__term" href={LINKS.github} target="_blank" rel="noreferrer" aria-label={t.hero.githubProfile}>
+            <code>
+              <span className="text-muted">$</span> open github.com/noctivulp-ch<span className="caret" aria-hidden="true" />
+            </code>
+          </a>
         </div>
       </div>
 

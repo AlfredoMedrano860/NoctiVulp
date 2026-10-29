@@ -20,6 +20,7 @@ export interface Dict {
     lead: string
     cta: string
     log: { updated: string; on: string; repos: string }
+    githubProfile: string
   }
   work: {
     eyebrow: string
@@ -136,6 +137,7 @@ const es: Dict = {
     lead: 'Herramientas chicas para quien viene de Windows y no quiere pelearse con la terminal, y otras más grandes para quien ya la usa a diario. Todo el código está en GitHub.',
     cta: 'Ver proyectos',
     log: { updated: 'Actualizado', on: 'en', repos: 'repos abiertos' },
+    githubProfile: 'Abrir mi perfil de GitHub',
   },
   work: {
     eyebrow: 'Proyectos',
@@ -309,6 +311,7 @@ const en: Dict = {
     lead: "Small tools for people coming from Windows who don't want to fight the terminal, and bigger ones for people who already live in it. All the code is on GitHub.",
     cta: 'See projects',
     log: { updated: 'Updated', on: 'on', repos: 'open repos' },
+    githubProfile: 'Open my GitHub profile',
   },
   work: {
     eyebrow: 'Projects',

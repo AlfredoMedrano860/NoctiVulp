@@ -895,12 +895,34 @@ a:hover .moth--hover .moth__wing {
 .hero__term {
   position: absolute;
   bottom: 6%;
+  white-space: nowrap;
   padding: 10px 16px;
   border-radius: 12px;
   background: rgba(13, 13, 13, 0.85);
   border: 1px solid var(--border);
   font-size: 0.85rem;
   color: var(--amber);
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+@media (max-width: 760px) {
+  .hero__term {
+    bottom: 0;
+    padding: 8px 12px;
+    font-size: clamp(0.7rem, 3.4vw, 0.85rem);
+  }
+}
+
+.hero__term:hover {
+  border-color: var(--border-strong);
+  background: rgba(20, 14, 12, 0.92);
+}
+
+.hero__term:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
 }
 
 .caret {
