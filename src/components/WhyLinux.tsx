@@ -8,6 +8,14 @@ import { TiltCard } from './TiltCard'
 
 const REASON_ART: ArtKind[] = ['laptop', 'gamepad', 'usb']
 
+const slug = (text: string) =>
+  text
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+
 export function WhyLinux() {
   const t = useT()
   return (
@@ -27,14 +35,19 @@ export function WhyLinux() {
           </SplitReveal>
         </div>
 
-        <div className="grid grid--3">
+        <div className="grid grid--3 tiles">
           {t.why.reasons.map((r, i) => (
             <Reveal key={r.title} delay={i * 120}>
               <TiltCard className="card reason">
-                <PaintedArt kind={REASON_ART[i % REASON_ART.length]} className="card-art" />
-                <span className="reason__num">{String(i + 1).padStart(2, '0')}</span>
-                <h3>{r.title}</h3>
-                <p>{r.text}</p>
+                <div className="reason__bar" aria-hidden="true">
+                  <span className="reason__ws">{i + 1}</span>
+                  <span className="reason__path">~/{slug(r.title)}</span>
+                </div>
+                <div className="reason__body">
+                  <PaintedArt kind={REASON_ART[i % REASON_ART.length]} className="card-art" />
+                  <h3>{r.title}</h3>
+                  <p>{r.text}</p>
+                </div>
               </TiltCard>
             </Reveal>
           ))}

@@ -1566,29 +1566,6 @@ a:hover .moth--hover .moth__wing {
   box-shadow: 0 0 10px #3ddc84;
 }
 
-/* ---------- por qué linux ---------- */
-.reason h3 {
-  margin: 18px 0 12px;
-}
-
-.reason p {
-  color: var(--muted);
-}
-
-.reason__num {
-  display: inline-block;
-  font-family: var(--font-title);
-  font-size: 3.4rem;
-  font-weight: 900;
-  line-height: 1;
-  background: var(--gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  opacity: 0.85;
-  transform: translateZ(40px);
-}
-
 /* ---------- modelo ---------- */
 .tier {
   display: flex;
@@ -2627,10 +2604,6 @@ a:hover .moth--hover .moth__wing {
   background: linear-gradient(90deg, rgba(10, 8, 8, 0.55), rgba(10, 8, 8, 0.2));
 }
 
-.reason__num {
-  filter: drop-shadow(0 0 14px rgba(255, 107, 0, 0.45));
-}
-
 .footer__bottom {
   padding-top: 24px;
   border-top: 1px solid rgba(255, 179, 71, 0.1);
@@ -3373,6 +3346,101 @@ html.big-cursor .cursor-ring {
   border-radius: 6px;
   background-color: rgba(255, 179, 71, 0.14);
 }
+
+/* ---------- por qué linux: ventanas en mosaico (Hyprland) ---------- */
+.tiles {
+  gap: 10px;
+}
+
+.card.reason {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 220, 190, 0.1);
+  background: #100b0a;
+  box-shadow: 0 24px 50px -30px rgba(0, 0, 0, 0.9);
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.3s ease;
+}
+
+.card.reason:hover {
+  border-color: transparent;
+  background:
+    linear-gradient(#100b0a, #100b0a) padding-box,
+    linear-gradient(45deg, var(--amber), var(--fire) 50%, var(--red)) border-box;
+  box-shadow: 0 30px 70px -35px rgba(0, 0, 0, 0.9);
+}
+
+.reason__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 220, 190, 0.08);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.reason__ws {
+  display: grid;
+  flex: none;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: rgba(255, 179, 71, 0.1);
+  color: var(--amber);
+  font-weight: 700;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
+}
+
+.card.reason:hover .reason__ws {
+  background: var(--fire);
+  color: #160a02;
+}
+
+.reason__path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reason__body {
+  position: relative;
+  flex: 1;
+  padding: 22px 24px 26px;
+}
+
+.reason__body .card-art {
+  position: relative;
+  top: auto;
+  right: auto;
+  float: right;
+  width: 64px;
+  margin: -6px -6px 8px 12px;
+}
+
+.reason h3 {
+  margin: 0 0 12px;
+}
+
+.reason h3::before {
+  content: '❯ ';
+  font-family: var(--font-mono);
+  color: var(--fire);
+}
+
+.reason p {
+  color: var(--muted);
+}
+
 /* animaciones del panel de accesibilidad */
 .a11y-panel__body {
   transition: height 0.3s ease-out;
