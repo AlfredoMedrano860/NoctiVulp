@@ -16,7 +16,7 @@ export const Header = forwardRef<HTMLButtonElement, HeaderProps>(function Header
   const ref = useRef<HTMLElement>(null)
   const otherLang: Lang = route.lang === 'es' ? 'en' : 'es'
 
-  // Se esconde al bajar y reaparece al subir.
+  // Siempre visible; al bajar toma fondo para que el contenido no se mezcle.
   useGSAP(() => {
     ScrollTrigger.create({
       start: 0,
@@ -24,7 +24,6 @@ export const Header = forwardRef<HTMLButtonElement, HeaderProps>(function Header
       onUpdate: (self) => {
         const el = ref.current
         if (!el) return
-        el.classList.toggle('is-hidden', self.direction === 1 && self.scroll() > 240)
         el.classList.toggle('is-scrolled', self.scroll() > 40)
       },
     })
