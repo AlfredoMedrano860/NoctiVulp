@@ -3441,6 +3441,60 @@ html.big-cursor .cursor-ring {
   color: var(--muted);
 }
 
+/* ---------- modelo: boletos de feria nocturna ---------- */
+.card.tier {
+  --cut: 140px;
+  gap: 0;
+  padding: 0;
+  border-radius: 14px;
+  -webkit-mask:
+    radial-gradient(circle 12px at 0 var(--cut), #0000 97%, #000) 0 0 / 51% 100% no-repeat,
+    radial-gradient(circle 12px at 100% var(--cut), #0000 97%, #000) 100% 0 / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle 12px at 0 var(--cut), #0000 97%, #000) 0 0 / 51% 100% no-repeat,
+    radial-gradient(circle 12px at 100% var(--cut), #0000 97%, #000) 100% 0 / 51% 100% no-repeat;
+}
+
+.tier__stub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  height: var(--cut);
+  padding: 0 26px;
+  border-bottom: 2px dashed rgba(255, 179, 71, 0.22);
+  background: rgba(255, 179, 71, 0.04);
+}
+
+.tier__stub .card-art {
+  top: 50%;
+  right: 22px;
+  translate: 0 -50%;
+}
+
+.tier__serial {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(166, 154, 144, 0.7);
+}
+
+.card.tier ul {
+  margin: 24px 26px;
+}
+
+.card.tier .magnetic {
+  margin: 0 26px 26px;
+}
+
+.tier--featured .tier__stub {
+  background: linear-gradient(120deg, rgba(255, 179, 71, 0.16), rgba(230, 57, 70, 0.1));
+  border-bottom-color: rgba(255, 179, 71, 0.45);
+}
+
 /* animaciones del panel de accesibilidad */
 .a11y-panel__body {
   transition: height 0.3s ease-out;

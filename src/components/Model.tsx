@@ -37,9 +37,14 @@ export function Model() {
           {t.model.tiers.map((tier, i) => (
             <Reveal key={tier.name} delay={i * 120}>
               <TiltCard className={`card tier ${i === FEATURED ? 'tier--featured' : ''}`}>
-                <PaintedArt kind={TIER_ART[i % TIER_ART.length]} className="card-art" />
-                <p className="tier__kicker">{tier.kicker}</p>
-                <h3>{tier.name}</h3>
+                <div className="tier__stub">
+                  <PaintedArt kind={TIER_ART[i % TIER_ART.length]} className="card-art" />
+                  <p className="tier__kicker">{tier.kicker}</p>
+                  <h3>{tier.name}</h3>
+                  <p className="tier__serial" aria-hidden="true">
+                    Nº {String(i + 1).padStart(3, '0')} · NoctiVulp
+                  </p>
+                </div>
                 <ul>
                   {tier.items.map((item) => (
                     <li key={item}>{item}</li>
