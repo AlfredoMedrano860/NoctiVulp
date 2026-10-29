@@ -4,6 +4,6 @@
 import '@fontsource/league-spartan/latin-700.css'
 import '@fontsource/league-spartan/latin-800.css'
 import '@fontsource/league-spartan/latin-900.css'
-import '@fontsource/poppins/latin-400.css'
-import '@fontsource/poppins/latin-600.css'
+import '@fontsource/atkinson-hyperlegible-next/latin-400.css'
+import '@fontsource/atkinson-hyperlegible-next/latin-600.css'
 import '@fontsource/jetbrains-mono/latin-400.css'
