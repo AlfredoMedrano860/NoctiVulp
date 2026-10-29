@@ -1,10 +1,13 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { AccessibilityMenu } from './components/AccessibilityMenu'
 import { Atmosphere } from './components/Atmosphere'
+import { BackToTop } from './components/BackToTop'
 import { Cursor } from './components/Cursor'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import { MenuOverlay } from './components/MenuOverlay'
 import { Preloader } from './components/Preloader'
+import { ReadingGuide } from './components/ReadingGuide'
 import { ScrollProgress } from './components/ScrollProgress'
 import { PAINTED_BACKGROUND } from './config'
 import { useGithubRepos } from './hooks/useGithubRepos'
@@ -83,6 +86,9 @@ function App() {
         )}
         <Footer />
       </div>
+      <BackToTop />
+      <AccessibilityMenu />
+      <ReadingGuide />
     </LangContext.Provider>
   )
 }

@@ -18,8 +18,20 @@ export function loadSplitText() {
   return splitText
 }
 
+// "Detener animaciones" del menú de accesibilidad: las animaciones de GSAP saltan
+// a su estado final y el resto del sitio se comporta como con movimiento reducido.
+let motionStopped = false
+
+export const isMotionStopped = () => motionStopped
+
+export function setMotionStopped(stopped: boolean) {
+  motionStopped = stopped
+  gsap.globalTimeline.timeScale(stopped ? 1000 : 1)
+  if (lenis) lenis.options.lerp = stopped ? 1 : 0.09
+}
+
 export const prefersReducedMotion = () =>
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  motionStopped || window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 export const hasFinePointer = () => window.matchMedia('(pointer: fine)').matches
 
@@ -28,11 +40,12 @@ let lenis: Lenis | null = null
 
 export function setLenis(instance: Lenis | null) {
   lenis = instance
+  if (lenis && motionStopped) lenis.options.lerp = 1
 }
 
-export function scrollToTarget(target: string | number, immediate = false) {
+export function scrollToTarget(target: string | number, immediate = false, duration = 1.4) {
   if (lenis) {
-    lenis.scrollTo(target, { offset: 0, immediate, duration: 1.4 })
+    lenis.scrollTo(target, { offset: 0, immediate, duration })
     return
   }
   if (typeof target === 'number') window.scrollTo({ top: target })

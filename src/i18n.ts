@@ -78,6 +78,36 @@ export interface Dict {
     backHome: string
     noDescription: string
   }
+  a11y: {
+    open: string
+    title: string
+    close: string
+    tabs: { reading: string; vision: string; tools: string }
+    reader: string
+    readerOn: string
+    readerOff: string
+    readerSpeaking: string
+    readerUnsupported: string
+    enableReader: string
+    readPage: string
+    readSelection: string
+    stop: string
+    clickToRead: string
+    readFocus: string
+    fontSize: string
+    contrast: string
+    links: string
+    dyslexia: string
+    spacing: string
+    colorMode: string
+    colors: { normal: string; monochrome: string; 'low-saturation': string; 'high-saturation': string }
+    bigCursor: string
+    readingGuide: string
+    stopAnimations: string
+    toolsHint: string
+    reset: string
+    toTop: string
+  }
 }
 
 const es: Dict = {
@@ -221,6 +251,36 @@ const es: Dict = {
     backHome: 'Volver al inicio',
     noDescription: 'Proyecto en desarrollo.',
   },
+  a11y: {
+    open: 'Menú de accesibilidad',
+    title: 'Accesibilidad',
+    close: 'Cerrar',
+    tabs: { reading: 'Lectura', vision: 'Visión', tools: 'Herramientas' },
+    reader: 'Lector de voz',
+    readerOn: 'Listo: haz clic en un texto para oírlo.',
+    readerOff: 'Apagado',
+    readerSpeaking: 'Leyendo…',
+    readerUnsupported: 'Tu navegador no tiene lectura por voz.',
+    enableReader: 'Activar lector de voz',
+    readPage: 'Leer la página',
+    readSelection: 'Leer lo seleccionado',
+    stop: 'Detener',
+    clickToRead: 'Leer al hacer clic',
+    readFocus: 'Leer al navegar con teclado',
+    fontSize: 'Tamaño del texto',
+    contrast: 'Alto contraste',
+    links: 'Resaltar enlaces',
+    dyslexia: 'Fuente para dislexia',
+    spacing: 'Más espacio entre letras',
+    colorMode: 'Color',
+    colors: { normal: 'Normal', monochrome: 'Monocromo', 'low-saturation': 'Saturación baja', 'high-saturation': 'Saturación alta' },
+    bigCursor: 'Cursor grande',
+    readingGuide: 'Guía de lectura',
+    stopAnimations: 'Detener animaciones',
+    toolsHint: 'La guía de lectura sigue al mouse y oscurece el resto de la pantalla.',
+    reset: 'Restablecer ajustes',
+    toTop: 'Volver arriba',
+  },
 }
 
 const en: Dict = {
@@ -363,6 +423,36 @@ const en: Dict = {
     notFoundText: 'The repo may have been renamed or is no longer public.',
     backHome: 'Back home',
     noDescription: 'Work in progress.',
+  },
+  a11y: {
+    open: 'Accessibility menu',
+    title: 'Accessibility',
+    close: 'Close',
+    tabs: { reading: 'Reading', vision: 'Vision', tools: 'Tools' },
+    reader: 'Voice reader',
+    readerOn: 'Ready: click any text to hear it.',
+    readerOff: 'Off',
+    readerSpeaking: 'Reading…',
+    readerUnsupported: "Your browser doesn't support speech.",
+    enableReader: 'Turn on voice reader',
+    readPage: 'Read the page',
+    readSelection: 'Read selection',
+    stop: 'Stop',
+    clickToRead: 'Read on click',
+    readFocus: 'Read on keyboard focus',
+    fontSize: 'Text size',
+    contrast: 'High contrast',
+    links: 'Highlight links',
+    dyslexia: 'Dyslexia-friendly font',
+    spacing: 'Wider letter spacing',
+    colorMode: 'Color',
+    colors: { normal: 'Normal', monochrome: 'Monochrome', 'low-saturation': 'Low saturation', 'high-saturation': 'High saturation' },
+    bigCursor: 'Big cursor',
+    readingGuide: 'Reading guide',
+    stopAnimations: 'Stop animations',
+    toolsHint: 'The reading guide follows the mouse and dims the rest of the screen.',
+    reset: 'Reset settings',
+    toTop: 'Back to top',
   },
 }
 

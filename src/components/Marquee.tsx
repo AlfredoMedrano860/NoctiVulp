@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef } from 'react'
-import { gsap, prefersReducedMotion, ScrollTrigger } from '../lib/motion'
+import { gsap, isMotionStopped, prefersReducedMotion, ScrollTrigger } from '../lib/motion'
 import { MothLogo } from './MothLogo'
 
 // Cinta de texto infinita que acelera y cambia de sentido con el scroll.
@@ -22,6 +22,7 @@ export function Marquee({ items, reverse = false }: { items: string[]; reverse?:
 
     const setX = gsap.quickSetter(track, 'x', 'px')
     const tick = (_time: number, delta: number) => {
+      if (isMotionStopped()) return
       boost *= 0.94
       x -= (0.6 + boost) * dir * base * delta * 0.06
       x = gsap.utils.wrap(-half, 0, x)
