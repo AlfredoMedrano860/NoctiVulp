@@ -5,7 +5,6 @@ import { useLang, useT } from '../i18n'
 import { projectPath } from '../router'
 import { ArrowIcon, GithubIcon, LineIcon } from './Icons'
 import { Link } from './Link'
-import { Magnetic } from './Magnetic'
 import { RollingText } from './RollingText'
 import type { Category } from '../data/projects'
 import type { ArtKind } from '../lib/paint/sizes'
@@ -99,14 +98,16 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
     return () => ro.disconnect()
   }, [count])
 
-  const [canvasReady, setCanvasReady] = useState(false)
+  // three.js (~500 kB) se pide recién cuando la sección está en pantalla y ya hay portadas que mostrar.
+  const [inView, setInView] = useState(false)
   useEffect(() => {
     const section = sectionRef.current
-    if (!section || canvasReady) return
-    const io = new IntersectionObserver(([entry]) => entry.isIntersecting && setCanvasReady(true), { rootMargin: '0px 0px 150px 0px' })
+    if (!section || inView) return
+    const io = new IntersectionObserver(([entry]) => entry.isIntersecting && setInView(true), { threshold: 0.25 })
     io.observe(section)
     return () => io.disconnect()
-  }, [canvasReady])
+  }, [inView])
+  const canvasReady = inView && art.canvases.length > 0
 
   const project = projects[view.index]
   const detail = project ? projectPath(lang, project.name) : '#'
@@ -136,7 +137,6 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
         <div className="container work__layout" ref={layoutRef}>
           <header className="work__top">
             <p className="eyebrow">
-              <span className={`dot ${live ? 'dot--live' : ''}`} />
               {t.work.eyebrow} · {live ? t.work.live : t.work.offline}
             </p>
             {count > 0 && (
@@ -201,11 +201,9 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
                   </div>
                 </dl>
                 <div className="work__actions">
-                  <Magnetic>
-                    <Link to={detail} className="btn btn--primary">
-                      {t.work.viewProject} <ArrowIcon />
-                    </Link>
-                  </Magnetic>
+                  <Link to={detail} className="btn btn--primary">
+                    {t.work.viewProject} <ArrowIcon />
+                  </Link>
                   <a href={project.url} target="_blank" rel="noreferrer" className="btn btn--ghost" aria-label={`${project.name} · GitHub`}>
                     <GithubIcon />
                   </a>
@@ -239,9 +237,7 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
               </div>
             </>
           ) : (
-            <div className="work__loading">
-              <span className="pulse" /> {t.work.loading}
-            </div>
+            <div className="work__loading">{t.work.loading}</div>
           )}
         </div>
       </div>

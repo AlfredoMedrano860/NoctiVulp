@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import screenshots from 'virtual:nv-screenshots'
 import type { Project } from '../data/projects'
 import { DICTS } from '../i18n'
+import { firstInteraction } from '../lib/interaction'
 import { buildProjectArt, toPreviewUrl } from '../lib/projectArt'
 
 export interface ProjectArt {
@@ -12,18 +13,6 @@ export interface ProjectArt {
 const EMPTY: ProjectArt = { canvases: [], urls: [] }
 
 const revoke = (url: string) => url && URL.revokeObjectURL(url)
-
-const INTERACTION_EVENTS = ['scroll', 'wheel', 'pointerdown', 'touchstart', 'keydown'] as const
-
-const firstInteraction = new Promise<void>((resolve) => {
-  const done = () => {
-    INTERACTION_EVENTS.forEach((type) => window.removeEventListener(type, done))
-    window.clearTimeout(timer)
-    resolve()
-  }
-  const timer = window.setTimeout(done, 6000)
-  INTERACTION_EVENTS.forEach((type) => window.addEventListener(type, done, { passive: true, once: true }))
-})
 
 const covers = Object.fromEntries(Object.entries(screenshots).map(([name, files]) => [name, files[0]]))
 

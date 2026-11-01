@@ -1,8 +1,8 @@
 // Enlaces externos del proyecto. Si un enlace está vacío, su botón no se muestra.
 export const LINKS = {
   github: 'https://github.com/noctivulp-ch',
-  youtube: '', // TODO: URL del canal de YouTube
-  patreon: '', // TODO: la cuenta está suspendida; agregar cuando se reactive
+  youtube: 'https://www.youtube.com/@NoctiVulp',
+  patreon: 'https://www.patreon.com/cw/NoctiVulp',
   bilibili: '',
 }
 

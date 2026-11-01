@@ -1,3 +1,5 @@
+import type { Category } from '../../data/projects'
+import { ART_HEIGHT, ART_WIDTH, paintCover, type CoverInput } from './cover'
 import { canvasToImageBlob, createCanvas } from './core'
 import { ART_SIZES, paintArt, type ArtKind } from './illustrations'
 import { PAINTERS, paintSoft, SCENE_H, SCENE_W, type Scene } from './scenes'
@@ -16,4 +18,16 @@ export async function renderArt(kind: ArtKind): Promise<Blob | null> {
   const canvas = createCanvas(width, height)
   if (!(await paintArt(kind, canvas))) return null
   return canvasToImageBlob(canvas)
+}
+
+export async function renderCovers(items: { project: CoverInput; index: number }[], labels: Record<Category, string>): Promise<ImageBitmap[] | null> {
+  const bitmaps: ImageBitmap[] = []
+  for (const { project, index } of items) {
+    const canvas = new OffscreenCanvas(ART_WIDTH, ART_HEIGHT)
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return null
+    paintCover(ctx, project, index, labels)
+    bitmaps.push(canvas.transferToImageBitmap())
+  }
+  return bitmaps
 }

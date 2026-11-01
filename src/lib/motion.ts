@@ -22,8 +22,6 @@ export function loadSplitText() {
 // a su estado final y el resto del sitio se comporta como con movimiento reducido.
 let motionStopped = false
 
-export const isMotionStopped = () => motionStopped
-
 export function setMotionStopped(stopped: boolean) {
   motionStopped = stopped
   gsap.globalTimeline.timeScale(stopped ? 1000 : 1)

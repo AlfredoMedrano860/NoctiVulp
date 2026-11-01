@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useT } from '../i18n'
 import { resetA11y, updateA11y, useA11y, type A11ySettings, type ColorMode, type FontSize } from '../lib/a11y'
 import {
@@ -11,80 +11,50 @@ import {
   stopReading,
   useSpeaking,
 } from '../lib/voiceReader'
-import { AccessibilityIcon, LineIcon, type LineIconName } from './Icons'
+import { AccessibilityIcon } from './Icons'
 
-type Tab = 'reading' | 'vision' | 'tools'
 type BoolKey = { [K in keyof A11ySettings]: A11ySettings[K] extends boolean ? K : never }[keyof A11ySettings]
 
-const TABS: Tab[] = ['reading', 'vision', 'tools']
 const FONT_SIZES: { value: FontSize; label: string }[] = [
   { value: 'normal', label: 'A' },
   { value: 'large', label: 'A+' },
   { value: 'xlarge', label: 'A++' },
+  { value: 'xxlarge', label: 'A+++' },
 ]
-const COLOR_MODES: ColorMode[] = ['normal', 'monochrome', 'low-saturation', 'high-saturation']
+const COLOR_GROUPS: { id: string; modes: ColorMode[] }[] = [
+  { id: 'color', modes: ['normal', 'monochrome', 'low-saturation', 'high-saturation', 'warm'] },
+  { id: 'colorblind', modes: ['protanopia', 'deuteranopia', 'tritanopia'] },
+]
 
-function Toggle({ label, icon, setting, disabled = false }: { label: string; icon: LineIconName; setting: BoolKey; disabled?: boolean }) {
+// Corrección para daltonismo (daltonize): lo que no se distingue se pasa a otros canales.
+const COLOR_BLIND_FILTERS: Record<string, string> = {
+  protanopia: '1 0 0 0 0  0.4789 0.4769 0.0442 0 0  0.5973 -0.6887 1.0914 0 0  0 0 0 1 0',
+  deuteranopia: '1.4366 -0.6314 0.1948 0 0  0 1 0 0 0  -0.1842 0.1863 0.9979 0 0  0 0 0 1 0',
+  tritanopia: '0.7412 -0.4072 0.666 0 0  0.0751 0.5852 0.3397 0 0  0 0 1 0 0  0 0 0 1 0',
+}
+
+// Fila de configuración: toda la fila es el interruptor.
+function Row({ label, setting, hint, disabled = false }: { label: string; setting: BoolKey; hint?: string; disabled?: boolean }) {
   const settings = useA11y()
+  const on = settings[setting]
   return (
-    <label className={`a11y-toggle ${disabled ? 'is-disabled' : ''}`}>
-      <span className="a11y-toggle__top">
-        <span className="a11y-toggle__icon">
-          <LineIcon name={icon} size={18} />
-        </span>
-        <input
-          type="checkbox"
-          className="a11y-switch"
-          checked={settings[setting]}
-          disabled={disabled}
-          onChange={() => updateA11y({ [setting]: !settings[setting] })}
-        />
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      disabled={disabled}
+      className={`a11y-row ${on ? 'is-on' : ''}`}
+      onClick={() => updateA11y({ [setting]: !on })}
+    >
+      <span className="a11y-row__text">
+        <span className="a11y-row__label">{label}</span>
+        {hint && <span className="a11y-row__hint">{hint}</span>}
       </span>
-      <span className="a11y-toggle__label">{label}</span>
-    </label>
+      <span className="a11y-state" aria-hidden="true">
+        {on ? 'on' : 'off'}
+      </span>
+    </button>
   )
-}
-
-// Pastilla que se desliza hasta la opción activa del grupo.
-function useIndicator(active: unknown) {
-  const ref = useRef<HTMLDivElement>(null)
-  useLayoutEffect(() => {
-    const group = ref.current
-    const indicator = group?.querySelector<HTMLElement>(':scope > .a11y-indicator')
-    if (!group || !indicator) return
-    const place = () => {
-      const btn = group.querySelector<HTMLElement>(':scope > .is-active')
-      if (!btn) return
-      indicator.style.width = btn.offsetWidth + 'px'
-      indicator.style.height = btn.offsetHeight + 'px'
-      indicator.style.transform = 'translate(' + btn.offsetLeft + 'px, ' + btn.offsetTop + 'px)'
-    }
-    place()
-    const id = requestAnimationFrame(() => group.classList.add('is-ready'))
-    const ro = new ResizeObserver(place)
-    ro.observe(group)
-    group.querySelectorAll(':scope > button').forEach((btn) => ro.observe(btn))
-    return () => {
-      cancelAnimationFrame(id)
-      ro.disconnect()
-    }
-  }, [active])
-  return ref
-}
-
-// El alto del panel acompaña al contenido de cada pestaña.
-function useAutoHeight(key: unknown) {
-  const outerRef = useRef<HTMLDivElement>(null)
-  const innerRef = useRef<HTMLDivElement>(null)
-  useLayoutEffect(() => {
-    const outer = outerRef.current
-    const inner = innerRef.current
-    if (!outer || !inner) return
-    const ro = new ResizeObserver(() => (outer.style.height = inner.offsetHeight + 'px'))
-    ro.observe(inner)
-    return () => ro.disconnect()
-  }, [key])
-  return { outerRef, innerRef }
 }
 
 // Con el lector encendido: leer el bloque de texto al que se le hace clic y lo que
@@ -125,19 +95,11 @@ export function AccessibilityMenu() {
   const settings = useA11y()
   const speaking = useSpeaking()
   const [open, setOpen] = useState(false)
-  const [tab, setTab] = useState<Tab>('reading')
-  const [dir, setDir] = useState(1)
-  const tabsRef = useIndicator(tab)
-  const sizeRef = useIndicator(`${tab}:${settings.fontSize}`)
-  const colorRef = useIndicator(`${tab}:${settings.colorMode}`)
-  const { outerRef, innerRef } = useAutoHeight(tab)
-
-  const selectTab = (value: Tab) => {
-    setDir(TABS.indexOf(value) >= TABS.indexOf(tab) ? 1 : -1)
-    setTab(value)
-  }
+  // El cajón no existe en la página hasta la primera vez que se abre.
+  const [mounted, setMounted] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
   useReaderListeners()
 
   const close = useCallback(() => {
@@ -147,6 +109,7 @@ export function AccessibilityMenu() {
 
   useEffect(() => {
     if (!open) return
+    closeRef.current?.focus({ preventScroll: true })
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close()
     const onDown = (e: PointerEvent) => {
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
@@ -159,6 +122,13 @@ export function AccessibilityMenu() {
     }
   }, [open, close])
 
+  const toggle = () => {
+    if (mounted) return setOpen((o) => !o)
+    setMounted(true)
+    // un frame cerrado para que la entrada se anime
+    requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true)))
+  }
+
   const startReading = (action: () => void) => {
     if (!settings.voiceReader) updateA11y({ voiceReader: true })
     action()
@@ -169,148 +139,145 @@ export function AccessibilityMenu() {
 
   return (
     <div ref={rootRef} className="a11y" data-a11y-ui="">
-      <div
-        id="a11y-panel"
-        role="dialog"
-        aria-label={a.title}
-        className={`a11y-panel ${open ? 'is-open' : ''}`}
-        inert={!open}
-        data-lenis-prevent=""
-      >
-        <div className="a11y-panel__head">
-          <h2 className="a11y-panel__title">{a.title}</h2>
-          <button type="button" className="a11y-close" onClick={close} aria-label={a.close}>
-            <LineIcon name="close" size={18} />
-          </button>
-        </div>
+      <svg className="a11y-filters" aria-hidden="true" focusable="false">
+        {Object.entries(COLOR_BLIND_FILTERS).map(([id, values]) => (
+          <filter key={id} id={`nv-${id}`} colorInterpolationFilters="sRGB">
+            <feColorMatrix type="matrix" values={values} />
+          </filter>
+        ))}
+      </svg>
+      {mounted && (
+        <>
+          <div className={`a11y-scrim ${open ? 'is-open' : ''}`} aria-hidden="true" onClick={close} />
+          <aside
+            id="a11y-panel"
+            role="dialog"
+            aria-labelledby="a11y-title"
+            className={`a11y-drawer ${open ? 'is-open' : ''}`}
+            inert={!open}
+            data-lenis-prevent=""
+          >
+            <header className="a11y-drawer__bar">
+              <span className="a11y-drawer__dots" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+              <div className="a11y-drawer__heading">
+                <h2 id="a11y-title" className="a11y-drawer__title">
+                  {a.title}
+                </h2>
+                <span className="a11y-drawer__path" aria-hidden="true">
+                  ~/.config/noctivulp/a11y.conf
+                </span>
+              </div>
+              <button ref={closeRef} type="button" className="a11y-key a11y-close" onClick={close} aria-label={a.close}>
+                esc
+              </button>
+            </header>
 
-        <div className="a11y-tabs" role="tablist" aria-label={a.title} ref={tabsRef}>
-          <span className="a11y-indicator" aria-hidden="true" />
-          {TABS.map((value) => (
-            <button
-              key={value}
-              type="button"
-              role="tab"
-              id={`a11y-tab-${value}`}
-              aria-selected={tab === value}
-              aria-controls={`a11y-tabpanel-${value}`}
-              className={`a11y-pill ${tab === value ? 'is-active' : ''}`}
-              onClick={() => selectTab(value)}
-            >
-              {a.tabs[value]}
-            </button>
-          ))}
-        </div>
+            <div className="a11y-drawer__body">
+              <section className="a11y-group" aria-labelledby="a11y-g-reading" style={{ '--i': 0 } as CSSProperties}>
+                <h3 id="a11y-g-reading" className="a11y-group__title">
+                  {a.tabs.reading}
+                </h3>
+                <Row label={a.reader} setting="voiceReader" hint={status} disabled={!readerSupported} />
+                <div className="a11y-cmds">
+                  <button type="button" className="a11y-cmd" disabled={!readerSupported} onClick={() => startReading(readPage)}>
+                    <span aria-hidden="true">▸</span> {a.readPage}
+                  </button>
+                  <button type="button" className="a11y-cmd" disabled={!readerSupported} onClick={() => startReading(readSelection)}>
+                    <span aria-hidden="true">▸</span> {a.readSelection}
+                  </button>
+                  <button type="button" className="a11y-cmd a11y-cmd--stop" disabled={!speaking} onClick={stopReading}>
+                    <span aria-hidden="true">■</span> {a.stop}
+                  </button>
+                </div>
+                <Row label={a.clickToRead} setting="clickToRead" disabled={readerOptionsDisabled} />
+                <Row label={a.readFocus} setting="readFocus" disabled={readerOptionsDisabled} />
+              </section>
 
-        <div className="a11y-panel__body" ref={outerRef}>
-          <div ref={innerRef} className="a11y-panel__content" key={tab} style={{ '--dir': dir } as CSSProperties}>
-            {tab === 'reading' && (
-              <section role="tabpanel" id="a11y-tabpanel-reading" aria-labelledby="a11y-tab-reading">
-                <div className="a11y-card">
-                  <div className="a11y-reader">
-                    <span className="a11y-toggle__icon">
-                      <LineIcon name="audio" size={18} />
-                    </span>
-                    <span className="a11y-reader__text">
-                      <span className="a11y-reader__title">{a.reader}</span>
-                      <span className="a11y-reader__status" role="status">
-                        {status}
+              <section className="a11y-group" aria-labelledby="a11y-g-vision" style={{ '--i': 1 } as CSSProperties}>
+                <h3 id="a11y-g-vision" className="a11y-group__title">
+                  {a.tabs.vision}
+                </h3>
+                <div className="a11y-field">
+                  <span className="a11y-row__label" id="a11y-size-label">
+                    {a.fontSize}
+                  </span>
+                  <div className="a11y-keys" role="radiogroup" aria-labelledby="a11y-size-label">
+                    {FONT_SIZES.map(({ value, label }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        role="radio"
+                        aria-checked={settings.fontSize === value}
+                        className={`a11y-key ${settings.fontSize === value ? 'is-active' : ''}`}
+                        onClick={() => updateA11y({ fontSize: value })}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <Row label={a.contrast} setting="highContrast" />
+                <Row label={a.links} setting="highlightLinks" />
+                <Row label={a.dyslexia} setting="dyslexiaFont" />
+                <Row label={a.spacing} setting="textSpacing" />
+                <Row label={a.headings} setting="highlightHeadings" />
+                <Row label={a.alignLeft} setting="alignLeft" />
+                {COLOR_GROUPS.map(({ id, modes }) => (
+                  <div key={id} className="a11y-field a11y-field--stack">
+                    <span className="a11y-row__text">
+                      <span className="a11y-row__label" id={`a11y-${id}-label`}>
+                        {id === 'color' ? a.colorMode : a.colorBlind}
                       </span>
+                      <span className="a11y-row__hint">{modes.includes(settings.colorMode) ? a.colors[settings.colorMode] : '—'}</span>
                     </span>
-                    <input
-                      type="checkbox"
-                      className="a11y-switch"
-                      aria-label={a.enableReader}
-                      checked={settings.voiceReader}
-                      disabled={!readerSupported}
-                      onChange={() => updateA11y({ voiceReader: !settings.voiceReader })}
-                    />
+                    <div className="a11y-swatches" role="radiogroup" aria-labelledby={`a11y-${id}-label`}>
+                      {modes.map((value) => (
+                        <button
+                          key={value}
+                          type="button"
+                          role="radio"
+                          aria-checked={settings.colorMode === value}
+                          aria-label={a.colors[value]}
+                          title={a.colors[value]}
+                          className={`a11y-swatch a11y-swatch--${value} ${settings.colorMode === value ? 'is-active' : ''}`}
+                          onClick={() => updateA11y({ colorMode: value })}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <div className="a11y-reader__actions">
-                    <button type="button" className="a11y-action" disabled={!readerSupported} onClick={() => startReading(readPage)}>
-                      <LineIcon name="page" size={16} /> {a.readPage}
-                    </button>
-                    <button type="button" className="a11y-action" disabled={!readerSupported} onClick={() => startReading(readSelection)}>
-                      <LineIcon name="click" size={16} /> {a.readSelection}
-                    </button>
-                    <button type="button" className="a11y-action a11y-action--stop" disabled={!speaking} onClick={stopReading}>
-                      <LineIcon name="stop" size={16} /> {a.stop}
-                    </button>
-                  </div>
-                </div>
-                <div className="a11y-grid">
-                  <Toggle label={a.clickToRead} icon="pointer" setting="clickToRead" disabled={readerOptionsDisabled} />
-                  <Toggle label={a.readFocus} icon="focus" setting="readFocus" disabled={readerOptionsDisabled} />
-                </div>
+                ))}
               </section>
-            )}
 
-            {tab === 'vision' && (
-              <section role="tabpanel" id="a11y-tabpanel-vision" aria-labelledby="a11y-tab-vision">
-                <span className="a11y-label">{a.fontSize}</span>
-                <div className="a11y-choices a11y-choices--3" role="radiogroup" aria-label={a.fontSize} ref={sizeRef}>
-                  <span className="a11y-indicator" aria-hidden="true" />
-                  {FONT_SIZES.map(({ value, label }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      role="radio"
-                      aria-checked={settings.fontSize === value}
-                      className={`a11y-pill ${settings.fontSize === value ? 'is-active' : ''}`}
-                      onClick={() => updateA11y({ fontSize: value })}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <div className="a11y-grid">
-                  <Toggle label={a.contrast} icon="eye" setting="highContrast" />
-                  <Toggle label={a.links} icon="link" setting="highlightLinks" />
-                  <Toggle label={a.dyslexia} icon="type" setting="dyslexiaFont" />
-                  <Toggle label={a.spacing} icon="spacing" setting="textSpacing" />
-                </div>
-                <span className="a11y-label">{a.colorMode}</span>
-                <div className="a11y-choices" role="radiogroup" aria-label={a.colorMode} ref={colorRef}>
-                  <span className="a11y-indicator" aria-hidden="true" />
-                  {COLOR_MODES.map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      role="radio"
-                      aria-checked={settings.colorMode === value}
-                      className={`a11y-pill ${settings.colorMode === value ? 'is-active' : ''}`}
-                      onClick={() => updateA11y({ colorMode: value })}
-                    >
-                      {a.colors[value]}
-                    </button>
-                  ))}
-                </div>
+              <section className="a11y-group" aria-labelledby="a11y-g-tools" style={{ '--i': 2 } as CSSProperties}>
+                <h3 id="a11y-g-tools" className="a11y-group__title">
+                  {a.tabs.tools}
+                </h3>
+                <Row label={a.bigCursor} setting="bigCursor" />
+                <Row label={a.readingGuide} setting="readingGuide" hint={a.toolsHint} />
+                <Row label={a.stopAnimations} setting="stopAnimations" />
+                <Row label={a.hideDecor} setting="hideDecorations" hint={a.hideDecorHint} />
+                <Row label={a.strongFocus} setting="strongFocus" />
               </section>
-            )}
+            </div>
 
-            {tab === 'tools' && (
-              <section role="tabpanel" id="a11y-tabpanel-tools" aria-labelledby="a11y-tab-tools">
-                <div className="a11y-grid a11y-grid--flush">
-                  <Toggle label={a.bigCursor} icon="pointer" setting="bigCursor" />
-                  <Toggle label={a.readingGuide} icon="book" setting="readingGuide" />
-                  <Toggle label={a.stopAnimations} icon="pause" setting="stopAnimations" />
-                </div>
-                <p className="a11y-hint">{a.toolsHint}</p>
-              </section>
-            )}
-          </div>
-        </div>
-
-        <button type="button" className="a11y-reset" onClick={resetA11y}>
-          {a.reset}
-        </button>
-      </div>
+            <footer className="a11y-drawer__foot">
+              <button type="button" className="a11y-reset" onClick={resetA11y}>
+                <span aria-hidden="true">$</span> {a.reset}
+              </button>
+            </footer>
+          </aside>
+        </>
+      )}
 
       <button
         ref={buttonRef}
         type="button"
         className="a11y-fab"
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggle}
         aria-label={a.open}
         aria-expanded={open}
         aria-controls="a11y-panel"

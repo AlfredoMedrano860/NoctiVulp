@@ -7,7 +7,6 @@ import { Link } from './Link'
 import { gsap, hasFinePointer, useGSAP } from '../lib/motion'
 import { ExternalButton } from './ExternalButton'
 import { GithubIcon, PatreonIcon, YoutubeIcon } from './Icons'
-import { Magnetic } from './Magnetic'
 import { MothLogo } from './MothLogo'
 import { SplitReveal } from './SplitReveal'
 
@@ -97,7 +96,7 @@ export function Hero({ projects, ready }: HeroProps) {
       <div className="container hero__inner">
         <div className="hero__copy">
           <p className="eyebrow" data-intro>
-            <span className="pulse" /> {t.hero.eyebrow}
+            {t.hero.eyebrow}
           </p>
           <SplitReveal as="h1" className="hero__title" play={ready} onScroll={false} delay={0.15} key={t.hero.title[0]}>
             {t.hero.title[0]}
@@ -109,16 +108,12 @@ export function Hero({ projects, ready }: HeroProps) {
           </p>
 
           <div className="hero__actions" data-intro>
-            <Magnetic>
-              <a href="#proyectos" className="btn btn--primary">
-                {t.hero.cta}
-              </a>
-            </Magnetic>
-            <Magnetic>
-              <ExternalButton href={LINKS.github}>
-                <GithubIcon /> GitHub
-              </ExternalButton>
-            </Magnetic>
+            <a href="#proyectos" className="btn btn--primary">
+              {t.hero.cta}
+            </a>
+            <ExternalButton href={LINKS.github}>
+              <GithubIcon /> GitHub
+            </ExternalButton>
             <ExternalButton href={LINKS.youtube}>
               <YoutubeIcon /> YouTube
             </ExternalButton>
@@ -127,17 +122,18 @@ export function Hero({ projects, ready }: HeroProps) {
             </ExternalButton>
           </div>
 
-          {latest && (
-            <p className="hero__log" data-intro>
-              <span className="dot dot--live" aria-hidden="true" />
-              {t.hero.log.updated} <time dateTime={latest.updatedAt}>{timeAgo(latest.updatedAt, lang)}</time> {t.hero.log.on}{' '}
-              <Link to={projectPath(lang, latest.name)}>{latest.name}</Link>
-              <span className="hero__log-sep" aria-hidden="true">
-                /
+          <p className="hero__log" data-intro>
+            {latest && (
+              <span className="hero__log-line">
+                {t.hero.log.updated} <time dateTime={latest.updatedAt}>{timeAgo(latest.updatedAt, lang)}</time> {t.hero.log.on}{' '}
+                <Link to={projectPath(lang, latest.name)}>{latest.name}</Link>
+                <span className="hero__log-sep" aria-hidden="true">
+                  /
+                </span>
+                {projects.length} {t.hero.log.repos}
               </span>
-              {projects.length} {t.hero.log.repos}
-            </p>
-          )}
+            )}
+          </p>
         </div>
 
         <div ref={artRef} className="hero__art">
@@ -150,11 +146,6 @@ export function Hero({ projects, ready }: HeroProps) {
             </code>
           </a>
         </div>
-      </div>
-
-      <div className="hero__scroll" data-intro aria-hidden="true">
-        <span>Scroll</span>
-        <i />
       </div>
     </section>
   )

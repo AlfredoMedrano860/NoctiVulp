@@ -6,7 +6,6 @@ import { Cursor } from './components/Cursor'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import { MenuOverlay } from './components/MenuOverlay'
-import { Preloader } from './components/Preloader'
 import { ReadingGuide } from './components/ReadingGuide'
 import { ScrollProgress } from './components/ScrollProgress'
 import { PAINTED_BACKGROUND } from './config'
@@ -30,9 +29,20 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuBtnRef = useRef<HTMLButtonElement>(null)
 
-  const onLoaded = useCallback(() => setReady(true), [])
   const closeMenu = useCallback(() => setMenuOpen(false), [])
   const pageKey = `${route.lang}:${route.page}:${route.name ?? ''}`
+
+  // La entrada del hero espera a las fuentes, para que el título se parta en líneas reales.
+  useEffect(() => {
+    let alive = true
+    const start = () => alive && setReady(true)
+    void document.fonts.ready.then(start)
+    const fallback = window.setTimeout(start, 1200)
+    return () => {
+      alive = false
+      window.clearTimeout(fallback)
+    }
+  }, [])
 
   // idioma y título del documento
   useEffect(() => {
@@ -71,7 +81,6 @@ function App() {
         {t.skip}
       </a>
       <Atmosphere vivid={route.page === 'home'} painted={PAINTED_BACKGROUND} pageKey={pageKey} />
-      <Preloader onDone={onLoaded} />
       <Cursor />
       <ScrollProgress />
       <Header ref={menuBtnRef} open={menuOpen} onToggle={() => setMenuOpen((o) => !o)} route={route} />

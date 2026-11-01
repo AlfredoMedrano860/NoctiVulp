@@ -6,11 +6,10 @@ import { MothLogo } from './MothLogo'
 import { PaintedArt } from './PaintedArt'
 import { Reveal } from './Reveal'
 import { SplitReveal } from './SplitReveal'
-import { TiltCard } from './TiltCard'
 import { MothLayer } from './MothLayer'
 
 const CHANNELS = [
-  { name: 'NoctiFox', href: LINKS.youtube, accent: 'fire' },
+  { name: 'NoctiFox', href: '', accent: 'fire' },
   { name: 'Noctivulp', href: LINKS.youtube, accent: 'red' },
 ]
 
@@ -38,10 +37,10 @@ export function Channels() {
             const copy = t.channels.items[i]
             return (
               <Reveal key={c.name} delay={i * 120}>
-                <TiltCard className={`card channel channel--${c.accent}`}>
+                <div className={`card channel channel--${c.accent}`}>
                   <div className="channel__screen" aria-hidden="true">
                     <span className="channel__ch">CH {String(i + 1).padStart(2, '0')}</span>
-                    <span className="channel__rec">REC</span>
+                    <span className={`channel__rec ${c.href ? '' : 'is-off'}`}>{c.href ? 'REC' : 'OFF'}</span>
                     <div className="channel__avatar">
                       <MothLogo size={56} animated />
                     </div>
@@ -56,10 +55,14 @@ export function Channels() {
                       </span>
                     ))}
                   </div>
-                  <ExternalButton href={c.href}>
-                    <YoutubeIcon /> {t.channels.cta}
-                  </ExternalButton>
-                </TiltCard>
+                  {c.href ? (
+                    <ExternalButton href={c.href}>
+                      <YoutubeIcon /> {t.channels.cta}
+                    </ExternalButton>
+                  ) : (
+                    <span className="channel__soon">{t.channels.soon}</span>
+                  )}
+                </div>
               </Reveal>
             )
           })}

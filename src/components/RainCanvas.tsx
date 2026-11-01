@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { firstInteraction } from '../lib/interaction'
 
 interface Drop {
   x: number
@@ -157,10 +158,19 @@ export function RainCanvas() {
       started = true
       sync()
     }
+    // En pantallas chicas la lluvia espera a la primera interacción: no compite con la carga.
     const hasIdle = typeof requestIdleCallback === 'function'
-    const idle = hasIdle ? requestIdleCallback(begin, { timeout: 3000 }) : setTimeout(begin, 1500)
+    let idle: number | ReturnType<typeof setTimeout> = 0
+    let cancelled = false
+    const schedule = () => {
+      if (cancelled) return
+      idle = hasIdle ? requestIdleCallback(begin, { timeout: 3000 }) : setTimeout(begin, 1500)
+    }
+    if (window.innerWidth < 760 || window.matchMedia('(pointer: coarse)').matches) void firstInteraction.then(schedule)
+    else schedule()
 
     return () => {
+      cancelled = true
       if (hasIdle) cancelIdleCallback(idle as number)
       else clearTimeout(idle)
       cancelAnimationFrame(frame)

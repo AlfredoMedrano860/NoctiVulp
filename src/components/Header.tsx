@@ -39,10 +39,6 @@ export const Header = forwardRef<HTMLButtonElement, HeaderProps>(function Header
           </span>
         </Link>
 
-        <p className="header__status">
-          <span className="pulse" /> {t.header.status}
-        </p>
-
         <div className="header__actions">
           <Link
             to={switchLangPath(route, otherLang)}

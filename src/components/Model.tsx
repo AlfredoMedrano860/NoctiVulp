@@ -4,11 +4,9 @@ import type { ArtKind } from '../lib/paint/sizes'
 import { MothLayer } from './MothLayer'
 import { ExternalButton } from './ExternalButton'
 import { PatreonIcon } from './Icons'
-import { Magnetic } from './Magnetic'
 import { PaintedArt } from './PaintedArt'
 import { Reveal } from './Reveal'
 import { SplitReveal } from './SplitReveal'
-import { TiltCard } from './TiltCard'
 
 // El nivel del medio (Patreon) es el destacado.
 const FEATURED = 1
@@ -40,7 +38,7 @@ export function Model() {
         <div className="grid grid--3">
           {t.model.tiers.map((tier, i) => (
             <Reveal key={tier.name} delay={i * 120}>
-              <TiltCard className={`card tier ${i === FEATURED ? 'tier--featured' : ''}`}>
+              <div className={`card tier ${i === FEATURED ? 'tier--featured' : ''}`}>
                 <div className="tier__stub">
                   <PaintedArt kind={TIER_ART[i % TIER_ART.length]} className="card-art" />
                   <p className="tier__kicker">{tier.kicker}</p>
@@ -55,13 +53,11 @@ export function Model() {
                   ))}
                 </ul>
                 {i === FEATURED && (
-                  <Magnetic>
-                    <ExternalButton href={LINKS.patreon} variant="primary">
-                      <PatreonIcon /> {t.model.patreonCta}
-                    </ExternalButton>
-                  </Magnetic>
+                  <ExternalButton href={LINKS.patreon} variant="primary">
+                    <PatreonIcon /> {t.model.patreonCta}
+                  </ExternalButton>
                 )}
-              </TiltCard>
+              </div>
             </Reveal>
           ))}
         </div>

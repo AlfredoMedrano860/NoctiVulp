@@ -1,8 +1,10 @@
 import { useSyncExternalStore } from 'react'
 import { setMotionStopped } from './motion'
 
-export type FontSize = 'normal' | 'large' | 'xlarge'
-export type ColorMode = 'normal' | 'monochrome' | 'low-saturation' | 'high-saturation'
+export const FONT_SIZES = ['normal', 'large', 'xlarge', 'xxlarge'] as const
+export const COLOR_MODES = ['normal', 'monochrome', 'low-saturation', 'high-saturation', 'warm', 'protanopia', 'deuteranopia', 'tritanopia'] as const
+export type FontSize = (typeof FONT_SIZES)[number]
+export type ColorMode = (typeof COLOR_MODES)[number]
 
 export interface A11ySettings {
   fontSize: FontSize
@@ -14,6 +16,10 @@ export interface A11ySettings {
   bigCursor: boolean
   readingGuide: boolean
   stopAnimations: boolean
+  highlightHeadings: boolean
+  hideDecorations: boolean
+  strongFocus: boolean
+  alignLeft: boolean
   voiceReader: boolean
   clickToRead: boolean
   readFocus: boolean
@@ -29,6 +35,10 @@ export const DEFAULTS: A11ySettings = {
   bigCursor: false,
   readingGuide: false,
   stopAnimations: false,
+  highlightHeadings: false,
+  hideDecorations: false,
+  strongFocus: false,
+  alignLeft: false,
   voiceReader: false,
   clickToRead: true,
   readFocus: true,
@@ -44,12 +54,19 @@ const CLASSES: Partial<Record<keyof A11ySettings, string>> = {
   textSpacing: 'text-spacing-mode',
   bigCursor: 'big-cursor',
   stopAnimations: 'stop-animations-mode',
+  highlightHeadings: 'highlight-headings',
+  hideDecorations: 'no-decor',
+  strongFocus: 'strong-focus',
+  alignLeft: 'align-left',
 }
 
 function load(): A11ySettings {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) ?? '{}') as Partial<A11ySettings>
-    return { ...DEFAULTS, ...saved }
+    const merged = { ...DEFAULTS, ...saved }
+    if (!FONT_SIZES.includes(merged.fontSize)) merged.fontSize = DEFAULTS.fontSize
+    if (!COLOR_MODES.includes(merged.colorMode)) merged.colorMode = DEFAULTS.colorMode
+    return merged
   } catch {
     return { ...DEFAULTS }
   }
@@ -60,7 +77,7 @@ const listeners = new Set<() => void>()
 
 function apply() {
   const root = document.documentElement
-  root.classList.remove('text-large', 'text-xlarge', 'color-monochrome', 'color-low-saturation', 'color-high-saturation')
+  root.classList.remove(...FONT_SIZES.map((v) => `text-${v}`), ...COLOR_MODES.map((v) => `color-${v}`))
   if (state.fontSize !== 'normal') root.classList.add(`text-${state.fontSize}`)
   if (state.colorMode !== 'normal') root.classList.add(`color-${state.colorMode}`)
   for (const [key, cls] of Object.entries(CLASSES)) root.classList.toggle(cls, Boolean(state[key as keyof A11ySettings]))

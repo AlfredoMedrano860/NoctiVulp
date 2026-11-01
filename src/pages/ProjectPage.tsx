@@ -9,7 +9,6 @@ import { homePath, projectPath } from '../router'
 import { ExternalButton } from '../components/ExternalButton'
 import { ArrowIcon, GithubIcon, PatreonIcon } from '../components/Icons'
 import { Link } from '../components/Link'
-import { Magnetic } from '../components/Magnetic'
 import { Reveal } from '../components/Reveal'
 import { SplitReveal } from '../components/SplitReveal'
 
@@ -68,7 +67,7 @@ export function ProjectPage({ name, projects, art }: ProjectPageProps) {
   if (!projects.length) {
     return (
       <main id="main" className="pp pp--empty container">
-        <span className="pulse" /> {t.work.loading}
+        {t.work.loading}
       </main>
     )
   }
@@ -135,27 +134,23 @@ export function ProjectPage({ name, projects, art }: ProjectPageProps) {
 
               <div className="hero__actions">
                 {release && (
-                  <Magnetic>
-                    <a href={release.url} target="_blank" rel="noreferrer" className="btn btn--primary">
-                      {t.project.download} {release.tag} <ArrowIcon />
-                    </a>
-                  </Magnetic>
+                  <a href={release.url} target="_blank" rel="noreferrer" className="btn btn--primary">
+                    {t.project.download} {release.tag} <ArrowIcon />
+                  </a>
                 )}
                 {onPatreon && (
                   <ExternalButton href={LINKS.patreon} variant={release ? 'ghost' : 'primary'}>
                     <PatreonIcon /> {t.project.patreon}
                   </ExternalButton>
                 )}
-                <Magnetic>
-                  <a
-                    href={project.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`btn ${release || (onPatreon && LINKS.patreon) ? 'btn--ghost' : 'btn--primary'}`}
-                  >
-                    <GithubIcon /> {t.project.github}
-                  </a>
-                </Magnetic>
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={`btn ${release || (onPatreon && LINKS.patreon) ? 'btn--ghost' : 'btn--primary'}`}
+                >
+                  <GithubIcon /> {t.project.github}
+                </a>
               </div>
             </div>
 
@@ -187,11 +182,7 @@ export function ProjectPage({ name, projects, art }: ProjectPageProps) {
         <div className="container">
           <p className="eyebrow">{t.project.readme}</p>
           {readme.status === 'ok' && <article className="readme" dangerouslySetInnerHTML={{ __html: readme.html }} />}
-          {readme.status === 'loading' && (
-            <p className="readme-state">
-              <span className="pulse" /> {t.project.readmeLoading}
-            </p>
-          )}
+          {readme.status === 'loading' && <p className="readme-state">{t.project.readmeLoading}</p>}
           {readme.status === 'error' && (
             <p className="readme-state">
               {t.project.readmeError}{' '}

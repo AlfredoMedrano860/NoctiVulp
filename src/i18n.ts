@@ -59,9 +59,9 @@ export interface Dict {
     lead: string
     items: { role: string; text: string; tags: string[] }[]
     cta: string
+    soon: string
   }
   footer: { title: Highlighted; text: string }
-  marquee: [string[], string[]]
   project: {
     back: string
     github: string
@@ -101,7 +101,22 @@ export interface Dict {
     dyslexia: string
     spacing: string
     colorMode: string
-    colors: { normal: string; monochrome: string; 'low-saturation': string; 'high-saturation': string }
+    colors: {
+      normal: string
+      monochrome: string
+      'low-saturation': string
+      'high-saturation': string
+      warm: string
+      protanopia: string
+      deuteranopia: string
+      tritanopia: string
+    }
+    colorBlind: string
+    headings: string
+    hideDecor: string
+    hideDecorHint: string
+    strongFocus: string
+    alignLeft: string
     bigCursor: string
     readingGuide: string
     stopAnimations: string
@@ -132,7 +147,7 @@ const es: Dict = {
     },
   },
   hero: {
-    eyebrow: 'Linux · Proton · Modding',
+    eyebrow: '~/linux',
     title: ['Hago programas para que Linux se sienta ', 'menos raro', ''],
     lead: 'Herramientas chicas para quien viene de Windows y no quiere pelearse con la terminal, y otras más grandes para quien ya la usa a diario. Todo el código está en GitHub.',
     cta: 'Ver proyectos',
@@ -227,15 +242,12 @@ const es: Dict = {
       },
     ],
     cta: 'Ver canal',
+    soon: 'Próximamente',
   },
   footer: {
     title: ['¿Usas Linux o estás ', 'por probarlo?', ''],
     text: 'Revisa los repos, pásate por el canal y, si algo te sirvió, apóyalo en Patreon.',
   },
-  marquee: [
-    ['Linux', 'Proton', 'Open source', 'Gaming', 'Hyprland', 'Modding'],
-    ['Gratis', 'Patreon', 'Comisiones', 'Mods', 'Traducciones'],
-  ],
   project: {
     back: 'Todos los proyectos',
     github: 'Ver en GitHub',
@@ -275,7 +287,22 @@ const es: Dict = {
     dyslexia: 'Fuente para dislexia',
     spacing: 'Más espacio entre letras',
     colorMode: 'Color',
-    colors: { normal: 'Normal', monochrome: 'Monocromo', 'low-saturation': 'Saturación baja', 'high-saturation': 'Saturación alta' },
+    colors: {
+      normal: 'Normal',
+      monochrome: 'Monocromo',
+      'low-saturation': 'Saturación baja',
+      'high-saturation': 'Saturación alta',
+      warm: 'Cálido (menos luz azul)',
+      protanopia: 'Protanopia (rojo)',
+      deuteranopia: 'Deuteranopia (verde)',
+      tritanopia: 'Tritanopia (azul)',
+    },
+    colorBlind: 'Filtros para daltonismo',
+    headings: 'Resaltar títulos',
+    hideDecor: 'Ocultar decoraciones',
+    hideDecorHint: 'Quita la lluvia, el fondo pintado, las ilustraciones y las polillas.',
+    strongFocus: 'Foco de teclado reforzado',
+    alignLeft: 'Alinear texto a la izquierda',
     bigCursor: 'Cursor grande',
     readingGuide: 'Guía de lectura',
     stopAnimations: 'Detener animaciones',
@@ -306,7 +333,7 @@ const en: Dict = {
     },
   },
   hero: {
-    eyebrow: 'Linux · Proton · Modding',
+    eyebrow: '~/linux',
     title: ['I make software so Linux feels ', 'less weird', ''],
     lead: "Small tools for people coming from Windows who don't want to fight the terminal, and bigger ones for people who already live in it. All the code is on GitHub.",
     cta: 'See projects',
@@ -401,15 +428,12 @@ const en: Dict = {
       },
     ],
     cta: 'Watch channel',
+    soon: 'Coming soon',
   },
   footer: {
     title: ['Using Linux or ', 'about to try it?', ''],
     text: 'Check out the repos, drop by the channel and, if something helped you, support it on Patreon.',
   },
-  marquee: [
-    ['Linux', 'Proton', 'Open source', 'Gaming', 'Hyprland', 'Modding'],
-    ['Free', 'Patreon', 'Commissions', 'Mods', 'Translations'],
-  ],
   project: {
     back: 'All projects',
     github: 'View on GitHub',
@@ -449,7 +473,22 @@ const en: Dict = {
     dyslexia: 'Dyslexia-friendly font',
     spacing: 'Wider letter spacing',
     colorMode: 'Color',
-    colors: { normal: 'Normal', monochrome: 'Monochrome', 'low-saturation': 'Low saturation', 'high-saturation': 'High saturation' },
+    colors: {
+      normal: 'Normal',
+      monochrome: 'Monochrome',
+      'low-saturation': 'Low saturation',
+      'high-saturation': 'High saturation',
+      warm: 'Warm (less blue light)',
+      protanopia: 'Protanopia (red)',
+      deuteranopia: 'Deuteranopia (green)',
+      tritanopia: 'Tritanopia (blue)',
+    },
+    colorBlind: 'Color blindness filters',
+    headings: 'Highlight headings',
+    hideDecor: 'Hide decorations',
+    hideDecorHint: 'Removes the rain, painted background, illustrations and moths.',
+    strongFocus: 'Stronger keyboard focus',
+    alignLeft: 'Left-align text',
     bigCursor: 'Big cursor',
     readingGuide: 'Reading guide',
     stopAnimations: 'Stop animations',

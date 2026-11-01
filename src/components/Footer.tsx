@@ -4,7 +4,6 @@ import { useT } from '../i18n'
 import { gsap, loadSplitText, useGSAP } from '../lib/motion'
 import { ExternalButton } from './ExternalButton'
 import { GithubIcon, PatreonIcon, YoutubeIcon } from './Icons'
-import { Magnetic } from './Magnetic'
 import { MothLogo } from './MothLogo'
 import { PaintedArt } from './PaintedArt'
 import { SplitReveal } from './SplitReveal'
@@ -50,21 +49,15 @@ export function Footer() {
           </SplitReveal>
           <p>{t.footer.text}</p>
           <div className="hero__actions center">
-            <Magnetic>
-              <ExternalButton href={LINKS.patreon} variant="primary">
-                <PatreonIcon /> Patreon
-              </ExternalButton>
-            </Magnetic>
-            <Magnetic>
-              <ExternalButton href={LINKS.github} variant={LINKS.patreon ? 'ghost' : 'primary'}>
-                <GithubIcon /> GitHub
-              </ExternalButton>
-            </Magnetic>
-            <Magnetic>
-              <ExternalButton href={LINKS.youtube}>
-                <YoutubeIcon /> YouTube
-              </ExternalButton>
-            </Magnetic>
+            <ExternalButton href={LINKS.patreon} variant="primary">
+              <PatreonIcon /> Patreon
+            </ExternalButton>
+            <ExternalButton href={LINKS.github} variant={LINKS.patreon ? 'ghost' : 'primary'}>
+              <GithubIcon /> GitHub
+            </ExternalButton>
+            <ExternalButton href={LINKS.youtube}>
+              <YoutubeIcon /> YouTube
+            </ExternalButton>
           </div>
         </div>
 
@@ -76,7 +69,9 @@ export function Footer() {
           <span className="brand">
             <MothLogo size={26} /> NoctiVulp
           </span>
-          <span className="text-muted">© {YEAR} NoctiVulp</span>
+          <span className="text-muted">
+            {t.header.status} · © {YEAR} NoctiVulp
+          </span>
         </div>
       </div>
     </footer>

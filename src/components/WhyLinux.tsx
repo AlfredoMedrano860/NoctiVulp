@@ -4,7 +4,6 @@ import { MothLayer } from './MothLayer'
 import { PaintedArt } from './PaintedArt'
 import { Reveal } from './Reveal'
 import { SplitReveal } from './SplitReveal'
-import { TiltCard } from './TiltCard'
 
 const REASON_ART: ArtKind[] = ['laptop', 'gamepad', 'usb']
 
@@ -38,7 +37,7 @@ export function WhyLinux() {
         <div className="grid grid--3 tiles">
           {t.why.reasons.map((r, i) => (
             <Reveal key={r.title} delay={i * 120}>
-              <TiltCard className="card reason">
+              <div className="card reason">
                 <div className="reason__bar" aria-hidden="true">
                   <span className="reason__ws">{i + 1}</span>
                   <span className="reason__path">~/{slug(r.title)}</span>
@@ -48,7 +47,7 @@ export function WhyLinux() {
                   <h3>{r.title}</h3>
                   <p>{r.text}</p>
                 </div>
-              </TiltCard>
+              </div>
             </Reveal>
           ))}
         </div>
