@@ -1,4 +1,4 @@
-import { LINKS } from '../config'
+import { CHANNEL_NAMES, LINKS } from '../config'
 import { useT } from '../i18n'
 import { ExternalButton } from './ExternalButton'
 import { YoutubeIcon } from './Icons'
@@ -9,8 +9,8 @@ import { SplitReveal } from './SplitReveal'
 import { MothLayer } from './MothLayer'
 
 const CHANNELS = [
-  { name: 'NoctiFox', href: '', accent: 'fire' },
-  { name: 'Noctivulp', href: LINKS.youtube, accent: 'red' },
+  { name: CHANNEL_NAMES[0], href: '', accent: 'fire' },
+  { name: CHANNEL_NAMES[1], href: LINKS.youtube, accent: 'red' },
 ]
 
 export function Channels() {

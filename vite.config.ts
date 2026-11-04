@@ -4,7 +4,11 @@ import { join } from 'node:path'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import { projectToRaw, REPOS_API, sanitizeRepos, slimRepo, type RawRepo } from './src/data/github.ts'
 import { FALLBACK_PROJECTS, type Project } from './src/data/projects.ts'
-import { DICTS, LANGS, type Lang } from './src/i18n.ts'
+import { LANGS, type Dict, type Lang } from './src/i18n.ts'
+import en from './src/locales/en.ts'
+import es from './src/locales/es.ts'
+
+const DICTS: Record<Lang, Dict> = { es, en }
 
 // ---------------------------------------------------------------------------
 // Seguridad
@@ -168,6 +172,12 @@ function projectBody(lang: Lang, p: Project) {
   return `<div class="ssr"><p class="ssr__brand"><a href="${homePath(lang)}">NoctiVulp</a></p><h1>${esc(p.name)}</h1><p>${esc(p.description || t.project.noDescription)}</p><p>${esc(t.categories[p.category])}${p.language ? ` · ${esc(p.language)}` : ''}${p.license ? ` · ${esc(p.license)}` : ''}</p><p><a href="${esc(p.url)}">${esc(t.project.github)}</a></p></div>`
 }
 
+const PRELOAD_FONTS = [
+  /league-spartan-latin-900-normal-[\w-]+\.woff2$/,
+  /atkinson-hyperlegible-next-latin-400-normal-[\w-]+\.woff2$/,
+  /jetbrains-mono-latin-400-normal-[\w-]+\.woff2$/,
+]
+
 function staticPagesPlugin(site: string, analytics?: { src: string; id: string }): Plugin {
   return {
     name: 'noctivulp-static-pages',
@@ -185,7 +195,24 @@ function staticPagesPlugin(site: string, analytics?: { src: string; id: string }
     async generateBundle(_options, bundle) {
       const html = bundle['index.html']
       if (!html || html.type !== 'asset') return
-      const template = String(html.source)
+      // Precarga las fuentes del hero (título, texto y la monoespaciada): sin esto el
+      // navegador las descubre recién al leer el CSS, y la entrada del hero las espera.
+      const preloads = Object.keys(bundle)
+        .filter((file) => PRELOAD_FONTS.some((re) => re.test(file)))
+        .map((file) => `<link rel="preload" href="/${file}" as="font" type="font/woff2" crossorigin />`)
+      const base = String(html.source).replace('</head>', `  ${preloads.join('\n    ')}\n  </head>`)
+      // Cada página precarga solo el diccionario de su idioma (src/locales/<lang>.ts).
+      const localeChunk = (lang: Lang) =>
+        Object.values(bundle).find(
+          (c) => c.type === 'chunk' && c.facadeModuleId?.replace(/\\/g, '/').endsWith(`/src/locales/${lang}.ts`),
+        )?.fileName
+      const templates = Object.fromEntries(
+        LANGS.map((lang) => {
+          const file = localeChunk(lang)
+          if (!file) this.warn(`No encontré el diccionario "${lang}" en el bundle.`)
+          return [lang, file ? base.replace('</head>', `  <link rel="modulepreload" href="/${file}" />\n  </head>`) : base]
+        }),
+      ) as Record<Lang, string>
       const { raw, projects, live } = await fetchRepos()
       if (!live) this.warn('No se pudo consultar GitHub: las páginas estáticas usan la lista de respaldo.')
       const shots = readScreenshots()
@@ -211,7 +238,7 @@ function staticPagesPlugin(site: string, analytics?: { src: string; id: string }
             description: t.meta.description,
           },
         }
-        const out = renderPage(template, page, site, raw)
+        const out = renderPage(templates[lang], page, site, raw)
         if (lang === 'es') {
           html.source = out
           emit('404.html', out)
@@ -224,7 +251,7 @@ function staticPagesPlugin(site: string, analytics?: { src: string; id: string }
           emit(
             `${path.slice(1)}index.html`,
             renderPage(
-              template,
+              templates[lang],
               {
                 lang,
                 path,

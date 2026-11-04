@@ -38,7 +38,7 @@ export function Hero({ projects, ready }: HeroProps) {
   const lang = useLang()
   const latest = projects.reduce<Project | null>((a, p) => (!a || p.updatedAt > a.updatedAt ? p : a), null)
 
-  // Entrada después del preloader + parallax al hacer scroll.
+  // Entrada después de cargar las fuentes.
   useGSAP(
     () => {
       if (!ready) return
@@ -47,18 +47,6 @@ export function Hero({ projects, ready }: HeroProps) {
         .from('[data-intro]:not(.hero__lead)', { y: 30, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.08 })
         .from('.hero__lead', { y: 30, duration: 1, ease: 'power3.out' }, 0.08)
         .from('.hero__art', { scale: 0.7, opacity: 0, duration: 1.6, ease: 'expo.out' }, 0)
-
-      gsap.to('.hero__copy', {
-        yPercent: -18,
-        opacity: 0.2,
-        ease: 'none',
-        scrollTrigger: { trigger: rootRef.current, start: 'top top', end: 'bottom top', scrub: true },
-      })
-      gsap.to('.hero__art', {
-        yPercent: 25,
-        ease: 'none',
-        scrollTrigger: { trigger: rootRef.current, start: 'top top', end: 'bottom top', scrub: true },
-      })
     },
     { dependencies: [ready], scope: rootRef },
   )

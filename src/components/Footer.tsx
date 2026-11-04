@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { LINKS } from '../config'
 import { useT } from '../i18n'
 import { gsap, loadSplitText, useGSAP } from '../lib/motion'
+import { progressBetween, whileVisible } from '../lib/scroll'
 import { ExternalButton } from './ExternalButton'
 import { GithubIcon, PatreonIcon, YoutubeIcon } from './Icons'
 import { MothLogo } from './MothLogo'
@@ -19,19 +20,28 @@ export function Footer() {
     (_context, contextSafe) => {
       if (!contextSafe) return
       let alive = true
+      let stop: (() => void) | undefined
       const create = contextSafe((SplitText: Awaited<ReturnType<typeof loadSplitText>>) => {
-        if (!alive) return
-        const split = SplitText.create('.footer__wordmark', { type: 'chars', mask: 'chars' })
-        gsap.from(split.chars, {
-          yPercent: 110,
-          ease: 'power3.out',
-          stagger: 0.04,
-          scrollTrigger: { trigger: '.footer__wordmark', start: 'top 95%', end: 'bottom 85%', scrub: 0.6 },
-        })
+        const mark = rootRef.current?.querySelector<HTMLElement>('.footer__wordmark')
+        if (!alive || !mark) return
+        const split = SplitText.create(mark, { type: 'chars', mask: 'chars' })
+        const tl = gsap.timeline({ paused: true }).from(split.chars, { yPercent: 110, ease: 'power3.out', stagger: 0.04 })
+        // Sigue al scroll: empieza cuando el borde de arriba llega al 95 % de la pantalla
+        // y termina cuando el de abajo llega al 85 %.
+        stop = whileVisible(
+          mark,
+          contextSafe(() => {
+            const { top, height } = mark.getBoundingClientRect()
+            const h = window.innerHeight
+            const progress = progressBetween(h * 0.95 - top, 0, h * 0.1 + height)
+            gsap.to(tl, { progress, duration: 0.6, ease: 'power2.out', overwrite: true })
+          }),
+        )
       })
       void loadSplitText().then(create)
       return () => {
         alive = false
+        stop?.()
       }
     },
     { scope: rootRef },

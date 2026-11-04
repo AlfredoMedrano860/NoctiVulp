@@ -1,12 +1,12 @@
 import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { SplitText } from 'gsap/SplitText'
 import { useGSAP } from '@gsap/react'
-import type Lenis from 'lenis'
 
-gsap.registerPlugin(ScrollTrigger, useGSAP)
+// Sin ScrollTrigger: deja un requestAnimationFrame corriendo siempre. Lo ligado al
+// scroll usa lib/scroll.ts.
+gsap.registerPlugin(useGSAP)
 
-export { gsap, ScrollTrigger, useGSAP }
+export { gsap, useGSAP }
 
 let splitText: Promise<typeof SplitText> | null = null
 
@@ -25,7 +25,6 @@ let motionStopped = false
 export function setMotionStopped(stopped: boolean) {
   motionStopped = stopped
   gsap.globalTimeline.timeScale(stopped ? 1000 : 1)
-  if (lenis) lenis.options.lerp = stopped ? 1 : 0.09
 }
 
 export const prefersReducedMotion = () =>
@@ -33,27 +32,14 @@ export const prefersReducedMotion = () =>
 
 export const hasFinePointer = () => window.matchMedia('(pointer: fine)').matches
 
-// Instancia compartida de Lenis para poder pausar el scroll o saltar a una sección.
-let lenis: Lenis | null = null
-
-export function setLenis(instance: Lenis | null) {
-  lenis = instance
-  if (lenis && motionStopped) lenis.options.lerp = 1
-}
-
-// travel: viaje largo (volver arriba, ir a una sección). Bloquea la rueda hasta llegar
-// para que la inercia no lo corte a mitad de camino.
-export function scrollToTarget(target: string | number, immediate = false, duration = 1.4, travel = false) {
-  if (lenis) {
-    lenis.scrollTo(target, { offset: 0, immediate, duration, lock: travel && !immediate })
-    return
-  }
-  if (typeof target === 'number') window.scrollTo({ top: target })
-  else document.querySelector(target)?.scrollIntoView()
+// Scroll nativo del navegador. immediate: salta sin animación (al cambiar de página o con
+// movimiento reducido); si no, se desplaza suave.
+export function scrollToTarget(target: string | number, immediate = false) {
+  const behavior: ScrollBehavior = immediate || prefersReducedMotion() ? 'instant' : 'smooth'
+  if (typeof target === 'number') window.scrollTo({ top: target, behavior })
+  else document.querySelector(target)?.scrollIntoView({ behavior })
 }
 
 export function lockScroll(locked: boolean) {
-  if (locked) lenis?.stop()
-  else lenis?.start()
   document.documentElement.classList.toggle('is-locked', locked)
 }

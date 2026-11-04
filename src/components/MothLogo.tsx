@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type CSSProperties } from 'react'
 
 // Polilla Automeris io a dos tintas: alas delanteras triangulares, ocelos en las
 // traseras, antenas plumosas y bigotes de zorro. Se dibuja la mitad izquierda y
@@ -54,37 +54,9 @@ interface MothLogoProps {
   animated?: boolean | 'hover'
 }
 
-export function MothLogo({ size = 40, className = '', animated = false }: MothLogoProps) {
-  const ref = useRef<SVGSVGElement>(null)
-
-  // Animar un <g> de SVG fuerza un layout por frame: solo aletea si se ve.
-  useEffect(() => {
-    const el = ref.current
-    if (animated !== true || !el) return
-    const io = new IntersectionObserver(([entry]) => el.classList.toggle('is-flapping', entry.isIntersecting))
-    io.observe(el)
-    return () => io.disconnect()
-  }, [animated])
-
-  const mode = animated === 'hover' ? 'moth--hover' : animated ? 'moth--animated' : ''
-
+function Body() {
   return (
-    <svg
-      ref={ref}
-      width={size}
-      height={size}
-      viewBox="0 0 64 64"
-      className={`moth ${mode} ${className}`}
-      aria-hidden="true"
-    >
-      <g className="moth__wing">
-        <Wing />
-      </g>
-      <g className="moth__wing">
-        <g transform={MIRROR}>
-          <Wing />
-        </g>
-      </g>
+    <>
       <Head />
       <g transform={MIRROR}>
         <Head />
@@ -96,6 +68,51 @@ export function MothLogo({ size = 40, className = '', animated = false }: MothLo
       <circle cx="32" cy="21.4" r="2.3" fill="var(--text)" />
       <circle cx="31.1" cy="21.2" r="0.55" fill="var(--bg)" />
       <circle cx="32.9" cy="21.2" r="0.55" fill="var(--bg)" />
-    </svg>
+    </>
+  )
+}
+
+export function MothLogo({ size = 40, className = '', animated = false }: MothLogoProps) {
+  const ref = useRef<HTMLSpanElement>(null)
+
+  // Solo aletea mientras se ve.
+  useEffect(() => {
+    const el = ref.current
+    if (animated !== true || !el) return
+    const io = new IntersectionObserver(([entry]) => el.classList.toggle('is-flapping', entry.isIntersecting))
+    io.observe(el)
+    return () => io.disconnect()
+  }, [animated])
+
+  if (!animated) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 64 64" className={`moth ${className}`} aria-hidden="true">
+        <Wing />
+        <g transform={MIRROR}>
+          <Wing />
+        </g>
+        <Body />
+      </svg>
+    )
+  }
+
+  // Animada: cada ala es un <svg> propio encima del cuerpo. Animar el transform de un
+  // <g> dentro del SVG obliga a recalcular el layout en cada frame; el de un <svg>
+  // entero lo resuelve la GPU.
+  const mode = animated === 'hover' ? 'moth--hover' : 'moth--animated'
+  return (
+    <span ref={ref} className={`moth moth--layered ${mode} ${className}`} style={{ '--moth-size': `${size}px` } as CSSProperties} aria-hidden="true">
+      <svg viewBox="0 0 64 64" className="moth__wing">
+        <Wing />
+      </svg>
+      <svg viewBox="0 0 64 64" className="moth__wing">
+        <g transform={MIRROR}>
+          <Wing />
+        </g>
+      </svg>
+      <svg viewBox="0 0 64 64">
+        <Body />
+      </svg>
+    </span>
   )
 }

@@ -33,8 +33,20 @@ html {
   scroll-padding-top: 0;
 }
 
+/* los enlaces a secciones (#proyectos…) se desplazan suave, salvo con movimiento reducido */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 html.is-locked {
   overflow: hidden;
+}
+
+/* lugar de una sección que todavía no se montó (montaje progresivo) */
+.deferred {
+  min-height: 100vh;
 }
 
 body {
@@ -176,9 +188,25 @@ code {
 }
 
 /* ---------- polilla ---------- */
+.moth--layered {
+  position: relative;
+  display: inline-block;
+  width: var(--moth-size);
+  aspect-ratio: 1;
+  vertical-align: middle;
+  line-height: 0;
+}
+
+.moth--layered > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* el eje de las alas está en (32, 30) del viewBox de 64 */
 .moth__wing {
-  transform-origin: 32px 30px;
-  transform-box: view-box;
+  transform-origin: 50% 46.875%;
 }
 
 .moth--animated.is-flapping .moth__wing {
@@ -191,9 +219,8 @@ a:hover .moth--hover .moth__wing {
   animation: flap 0.35s ease-in-out infinite;
 }
 
-/* el menú cerrado y los paneles inactivos no aletean */
-.menu[aria-hidden='true'] .moth__wing,
-.menu__preview-item:not(.is-active) .moth__wing {
+/* el menú cerrado no aletea */
+.menu[aria-hidden='true'] .moth__wing {
   animation: none !important;
 }
 
@@ -205,62 +232,6 @@ a:hover .moth--hover .moth__wing {
   50% {
     transform: scaleX(0.72);
   }
-}
-
-/* ---------- cursor (polilla que acompaña al cursor del sistema) ---------- */
-.cursor-moth {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 8px 0 0 8px;
-  pointer-events: none;
-  opacity: 0;
-}
-
-.cursor-moth__body {
-  display: block;
-  line-height: 0;
-  opacity: 0.35;
-  transform-origin: 50% 40%;
-  transition:
-    opacity 0.3s ease,
-    scale 0.35s var(--ease-out);
-}
-
-.cursor-moth.is-hover .cursor-moth__body {
-  opacity: 0.85;
-  scale: 1.15;
-}
-
-.cursor-moth.is-hover .moth__wing {
-  animation: flap 0.35s ease-in-out infinite;
-}
-
-.cursor-moth__label {
-  padding: 4px 9px;
-  border-radius: 6px;
-  background: var(--fire);
-  color: #160a02;
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  opacity: 0;
-  translate: -6px 0;
-  transition:
-    opacity 0.2s ease,
-    translate 0.3s var(--ease-out);
-}
-
-.cursor-moth.has-label .cursor-moth__label {
-  opacity: 1;
-  translate: 0 0;
 }
 
 /* ---------- barra de progreso ---------- */
@@ -572,64 +543,172 @@ a:hover .moth--hover .moth__wing {
 .menu__preview {
   position: relative;
   align-self: center;
+  display: flex;
   aspect-ratio: 4 / 5;
   max-height: 62vh;
-  border-radius: 24px;
+}
+
+/* ---------- terminal de la vista previa del menú ---------- */
+.term {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: 20px;
   border: 1px solid var(--border);
-  background: var(--bg-2);
+  background:
+    radial-gradient(90% 50% at 50% 115%, rgba(255, 107, 0, 0.12), transparent 70%),
+    var(--bg-2);
+  box-shadow: 0 40px 90px -45px rgba(0, 0, 0, 0.9);
   overflow: hidden;
+  font-family: var(--font-mono);
 }
 
-.menu__preview-item {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 28px;
-  opacity: 0;
-  transform: scale(1.08);
-  transition:
-    opacity 0.6s ease,
-    transform 0.9s var(--ease-out);
+.term__bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.74rem;
+  color: var(--muted);
 }
 
-.menu__preview-item:nth-child(even) {
-  --logo-a: var(--red);
-  --logo-b: var(--fire);
+.term__dots {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
 }
 
-.menu__preview-item.is-active {
-  opacity: 1;
-  transform: none;
+.term__dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--red);
 }
 
-.menu__words {
-  display: grid;
-  justify-items: center;
+.term__dots i:nth-child(2) {
+  background: var(--amber);
 }
 
-.menu__word-mask {
+.term__dots i:nth-child(3) {
+  background: var(--fire);
+}
+
+.term__title {
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.menu__word {
-  display: block;
-  font-family: var(--font-title);
-  font-size: clamp(1.8rem, 3.4vw, 2.8rem);
-  font-weight: 800;
-  line-height: 1.1;
-  transform: translateY(110%);
-  transition: transform 0.8s var(--ease-out);
+.term__body {
+  /* lo que tarda en escribirse el comando: después aparece la salida */
+  --type: calc(var(--chars) * 55ms + 200ms);
+  flex: 1;
+  min-height: 0;
+  padding: 26px 24px;
+  font-size: clamp(0.88rem, 1.1vw, 1rem);
+  line-height: 1.7;
 }
 
-.menu__word-mask:nth-child(2) .menu__word {
+.term__prompt {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.term__path {
+  color: var(--amber);
+}
+
+.term__sign {
+  color: var(--muted);
+}
+
+.term__cmd {
+  display: inline-block;
+  width: calc(var(--chars) * 1ch);
+  overflow: hidden;
+  vertical-align: bottom;
+  white-space: nowrap;
+  color: var(--text);
+  animation: term-type calc(var(--chars) * 55ms) steps(var(--chars)) 0.2s both;
+}
+
+@keyframes term-type {
+  from {
+    width: 0;
+  }
+}
+
+.term__out {
+  display: grid;
+  gap: 4px;
+  margin: 12px 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.term__line,
+.term__prompt--idle {
+  animation: term-line 0.35s var(--ease-out) both;
+  animation-delay: calc(var(--type) + var(--i) * 70ms);
+}
+
+.term__line {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--text);
+}
+
+.term__line > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.term__line.is-muted {
+  color: var(--muted);
+}
+
+.term__meta {
+  flex-shrink: 0;
   color: var(--fire);
-  transition-delay: 0.06s;
 }
 
-.menu__preview-item.is-active .menu__word {
-  transform: none;
+@keyframes term-line {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+
+.term__foot {
+  padding: 20px 24px 24px;
+  border-top: 1px dashed var(--border);
+  animation: term-line 0.5s var(--ease-out) both;
+}
+
+.term__num {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--fire);
+}
+
+.term__num span {
+  color: var(--muted);
+}
+
+.term__words {
+  margin: 6px 0 0;
+  font-family: var(--font-title);
+  font-size: clamp(1.6rem, 2.6vw, 2.3rem);
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.term__words span {
+  color: var(--fire);
 }
 
 .menu__footer {
@@ -993,12 +1072,38 @@ a:hover .moth--hover .moth__wing {
 }
 
 .work-canvas,
-.work-canvas canvas,
 .work-canvas img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* portada del carrusel: la nueva entra con un fundido sobre la anterior */
+.work-cover {
+  position: relative;
+  background: #0b0a09;
+}
+
+.work-cover img {
+  position: absolute;
+  inset: 0;
+  transition: scale 0.8s var(--ease-out);
+}
+
+.work-cover img.is-entering {
+  animation: cover-in 0.9s var(--ease-out) both;
+}
+
+.work__media:hover .work-cover img {
+  scale: 1.03;
+}
+
+@keyframes cover-in {
+  from {
+    opacity: 0;
+    scale: 1.06;
+  }
 }
 
 .work__info {
@@ -1020,7 +1125,6 @@ a:hover .moth--hover .moth__wing {
   line-height: 0.95;
   letter-spacing: -0.04em;
   overflow-wrap: anywhere;
-  mix-blend-mode: difference;
 }
 
 .work__title .roll {
@@ -1641,7 +1745,6 @@ a:hover .moth--hover .moth__wing {
   letter-spacing: -0.05em;
   text-align: center;
   color: var(--fire);
-  mix-blend-mode: screen;
   opacity: 0.92;
   white-space: nowrap;
 }
@@ -1732,7 +1835,6 @@ a:hover .moth--hover .moth__wing {
   .work__title {
     width: 100%;
     font-size: min(clamp(2rem, 9vw, 3.4rem), calc(100cqi / (var(--name-length, 10) * 0.56)));
-    mix-blend-mode: normal;
   }
 
   .work__desc {
@@ -1938,7 +2040,7 @@ a:hover .moth--hover .moth__wing {
 
 .atmosphere__layer.is-ready {
   visibility: visible;
-  animation: atmo-in 1.8s ease both;
+  animation: atmo-in 1.8s ease backwards;
 }
 
 .atmosphere__layer--city.is-ready,
@@ -1954,7 +2056,7 @@ a:hover .moth--hover .moth__wing {
 
 @keyframes atmo-in {
   from {
-    filter: brightness(0);
+    opacity: 0;
   }
 }
 
@@ -2877,10 +2979,6 @@ html.stop-animations-mode .reveal {
 html.big-cursor,
 html.big-cursor * {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cpath d='M5 2.5 20 12l-6.2 1.4 3.7 7.6-2.7 1.2-3.7-7.6L6.6 19z' fill='%23fff' stroke='%23000' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E") 5 3, auto !important;
-}
-
-html.big-cursor .cursor-moth {
-  display: none;
 }
 
 .a11y-reading-highlight {

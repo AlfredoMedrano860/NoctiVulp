@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { CATEGORIES, type Category, type Project } from '../data/projects'
 import { useLang, useT } from '../i18n'
 import { gsap, useGSAP } from '../lib/motion'
+import { onReach } from '../lib/scroll'
 import { projectPath } from '../router'
 import { ArrowIcon } from './Icons'
 import { Link } from './Link'
@@ -35,14 +36,10 @@ export function ProjectIndex({ projects, artUrls }: ProjectIndexProps) {
 
   useGSAP(
     () => {
-      gsap.from('.index__row', {
-        y: 40,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power3.out',
-        stagger: 0.05,
-        scrollTrigger: { trigger: '.index__list', start: 'top 85%', once: true },
-      })
+      const list = sectionRef.current?.querySelector('.index__list')
+      if (!list) return
+      const tween = gsap.from('.index__row', { y: 40, opacity: 0, duration: 0.8, ease: 'power3.out', stagger: 0.05, paused: true })
+      return onReach(list, () => tween.play(), 0.85)
     },
     { dependencies: [filter, projects.length], scope: sectionRef, revertOnUpdate: true },
   )

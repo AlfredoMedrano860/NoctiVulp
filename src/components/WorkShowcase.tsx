@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties, type TouchEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type TouchEvent } from 'react'
 import type { Project } from '../data/projects'
 import type { ProjectArt } from '../hooks/useProjectArt'
 import { useLang, useT } from '../i18n'
@@ -10,11 +10,9 @@ import type { Category } from '../data/projects'
 import type { ArtKind } from '../lib/paint/sizes'
 import { MothLayer } from './MothLayer'
 import { PaintedArt } from './PaintedArt'
+import { WorkCover } from './WorkCover'
 
 const CATEGORY_ART: Record<Category, ArtKind> = { linux: 'laptop', gaming: 'gamepad', apps: 'window', design: 'palette' }
-
-// Three.js pesa bastante: se carga aparte, cuando hace falta.
-const WorkCanvas = lazy(() => import('./WorkCanvas').then((m) => ({ default: m.WorkCanvas })))
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
@@ -98,20 +96,8 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
     return () => ro.disconnect()
   }, [count])
 
-  // three.js (~500 kB) se pide recién cuando la sección está en pantalla y ya hay portadas que mostrar.
-  const [inView, setInView] = useState(false)
-  useEffect(() => {
-    const section = sectionRef.current
-    if (!section || inView) return
-    const io = new IntersectionObserver(([entry]) => entry.isIntersecting && setInView(true), { threshold: 0.25 })
-    io.observe(section)
-    return () => io.disconnect()
-  }, [inView])
-  const canvasReady = inView && art.canvases.length > 0
-
   const project = projects[view.index]
   const detail = project ? projectPath(lang, project.name) : '#'
-  const fallbackCover = art.urls[view.index] && <img className="work-canvas" src={art.urls[view.index]} alt="" />
 
   // Las estrellas solo se muestran si hay; si no, la licencia.
   const thirdMeta = project
@@ -149,14 +135,8 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
 
           {project ? (
             <>
-              <Link to={detail} className="work__media" data-cursor={t.work.cursor} aria-label={`${t.work.viewProject}: ${project.name}`}>
-                {canvasReady ? (
-                  <Suspense fallback={fallbackCover}>
-                    <WorkCanvas arts={art.canvases} fallbackUrls={art.urls} index={view.index} />
-                  </Suspense>
-                ) : (
-                  fallbackCover
-                )}
+              <Link to={detail} className="work__media" aria-label={`${t.work.viewProject}: ${project.name}`}>
+                <WorkCover urls={art.urls} index={view.index} />
                 <span className="work__badges" aria-hidden="true">
                   {(Object.keys(CATEGORY_ART) as Category[]).map((category) => (
                     <PaintedArt
@@ -218,7 +198,6 @@ export function WorkShowcase({ projects, art, live }: WorkShowcaseProps) {
                     onClick={() => goTo(i)}
                     aria-label={`${pad(i + 1)} · ${p.name}`}
                     aria-current={i === view.index ? 'true' : undefined}
-                    data-cursor={p.name}
                   >
                     {pad(i + 1)}
                   </button>
