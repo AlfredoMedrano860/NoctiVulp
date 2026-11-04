@@ -155,7 +155,6 @@ export function AccessibilityMenu() {
             aria-labelledby="a11y-title"
             className={`a11y-drawer ${open ? 'is-open' : ''}`}
             inert={!open}
-            data-lenis-prevent=""
           >
             <header className="a11y-drawer__bar">
               <span className="a11y-drawer__dots" aria-hidden="true">

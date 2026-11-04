@@ -6,6 +6,9 @@ export const LINKS = {
   bilibili: '',
 }
 
+// Canales de YouTube, en orden (sus textos están en i18n: channels.items).
+export const CHANNEL_NAMES = ['NoctiFox', 'Noctivulp']
+
 // Repos cuyo compilado está en Patreon: su ficha muestra el botón "Compilado en Patreon"
 // (solo si LINKS.patreon tiene un enlace).
 export const PATREON_PROJECTS: string[] = []

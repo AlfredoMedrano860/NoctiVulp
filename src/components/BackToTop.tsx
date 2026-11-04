@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useT } from '../i18n'
-import { prefersReducedMotion, scrollToTarget } from '../lib/motion'
+import { scrollToTarget } from '../lib/motion'
 import { ChevronUpIcon } from './Icons'
 
 export function BackToTop() {
@@ -18,7 +18,7 @@ export function BackToTop() {
     <button
       type="button"
       className={`to-top ${visible ? 'is-visible' : ''}`}
-      onClick={() => scrollToTarget(0, prefersReducedMotion(), 1.4, true)}
+      onClick={() => scrollToTarget(0)}
       aria-label={t.a11y.toTop}
       tabIndex={visible ? 0 : -1}
       aria-hidden={!visible}

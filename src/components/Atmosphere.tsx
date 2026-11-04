@@ -1,85 +1,62 @@
 import { useEffect, useRef, useState } from 'react'
-import { gsap, ScrollTrigger, useGSAP } from '../lib/motion'
-import { paintSceneBlobs } from '../lib/paint/paintClient'
-import { readScenes, storeScenes } from '../lib/paint/sceneCache'
-import type { Scene } from '../lib/paint/scenes'
+import { onScrollFrame, progressBetween } from '../lib/scroll'
 import { RainCanvas } from './RainCanvas'
 
+type Scene = 'city' | 'alley' | 'roof'
+type Layer = Scene | 'crisp'
+
 const SCENES: Scene[] = ['city', 'alley', 'roof']
+
+// Escenas pintadas una vez con `npm run paint` (public/paint): la versión suave de cada
+// una y la nítida de la ciudad, que se ve arriba del todo y se desvanece al bajar.
+const sceneUrl = (scene: Scene, soft = true) => `/paint/scene-${scene}${soft ? '-soft' : ''}.webp`
 
 interface AtmosphereProps {
   vivid: boolean
   painted: boolean
   pageKey: string
+  // cambia a true cuando terminan de montarse las secciones de abajo
+  mounted: boolean
 }
 
-export function Atmosphere({ vivid, painted, pageKey }: AtmosphereProps) {
+export function Atmosphere({ vivid, painted, pageKey, mounted }: AtmosphereProps) {
   const crispRef = useRef<HTMLImageElement>(null)
-  const [layers, setLayers] = useState<Partial<Record<Scene, string>>>({})
-  const [crispUrl, setCrispUrl] = useState<string>()
+  const [loaded, setLoaded] = useState<Partial<Record<Layer, boolean>>>({})
   const [scene, setScene] = useState<Scene>('city')
+  const markLoaded = (layer: Layer) => () => setLoaded((current) => ({ ...current, [layer]: true }))
 
+  // La escena es la de la sección que cruza la línea del 55 % de la pantalla.
   useEffect(() => {
-    if (!painted) return
-    let cancelled = false
-    ;(async () => {
-      for (const s of SCENES) {
-        const keys = s === 'city' ? ['city-soft', 'city'] : [`${s}-soft`]
-        let blobs = await readScenes(keys)
-        if (!blobs) {
-          blobs = await paintSceneBlobs(s)
-          if (!blobs || cancelled) return
-          void storeScenes(keys, blobs)
+    const sections = document.querySelectorAll<HTMLElement>('[data-scene]:not(.atmosphere)')
+    if (!sections.length) {
+      // páginas sin secciones con escena (fichas de proyecto): la ciudad
+      const id = requestAnimationFrame(() => setScene('city'))
+      return () => cancelAnimationFrame(id)
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setScene(((entry.target as HTMLElement).dataset.scene as Scene) ?? 'city')
         }
-        if (cancelled) return
-        const [softUrl, crisp] = blobs.map((blob) => URL.createObjectURL(blob))
-        setLayers((current) => ({ ...current, [s]: softUrl }))
-        if (crisp) setCrispUrl(crisp)
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [painted])
+      },
+      { rootMargin: '-55% 0px -44% 0px' },
+    )
+    sections.forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [pageKey, mounted])
 
+  // La ciudad nítida se desvanece en el primer 90 % de pantalla de scroll (solo en el inicio).
   useEffect(() => {
-    let triggers: ScrollTrigger[] = []
-    const id = requestAnimationFrame(() => {
-      const sections = document.querySelectorAll<HTMLElement>('[data-scene]')
-      if (!sections.length) setScene('city')
-      triggers = Array.from(sections).map((el) =>
-        ScrollTrigger.create({
-          trigger: el,
-          start: 'top 55%',
-          end: 'bottom 55%',
-          onToggle: (self) => {
-            if (self.isActive) setScene((el.dataset.scene as Scene) ?? 'city')
-          },
-        }),
-      )
-    })
-    return () => {
-      cancelAnimationFrame(id)
-      triggers.forEach((t) => t.kill())
+    const crisp = crispRef.current
+    if (!crisp) return
+    if (!vivid) {
+      crisp.style.opacity = '0'
+      return
     }
-  }, [pageKey])
-
-  useGSAP(
-    () => {
-      const crisp = crispRef.current
-      if (!crisp) return
-      if (!vivid) {
-        gsap.set(crisp, { opacity: 0 })
-        return
-      }
-      gsap.fromTo(
-        crisp,
-        { opacity: 1 },
-        { opacity: 0, ease: 'none', scrollTrigger: { start: 0, end: () => window.innerHeight * 0.9, scrub: true } },
-      )
-    },
-    { dependencies: [vivid], revertOnUpdate: true },
-  )
+    return onScrollFrame(() => {
+      crisp.style.opacity = String(1 - progressBetween(window.scrollY, 0, window.innerHeight * 0.9))
+    })
+  }, [vivid])
 
   return (
     <div className="atmosphere" data-scene={scene} aria-hidden="true">
@@ -88,18 +65,21 @@ export function Atmosphere({ vivid, painted, pageKey }: AtmosphereProps) {
           {SCENES.map((s) => (
             <img
               key={s}
-              src={layers[s]}
+              src={sceneUrl(s)}
               alt=""
               decoding="async"
-              className={`atmosphere__layer atmosphere__layer--${s} ${layers[s] ? 'is-ready' : ''}`}
+              fetchPriority={s === 'city' ? 'high' : 'low'}
+              onLoad={markLoaded(s)}
+              className={`atmosphere__layer atmosphere__layer--${s} ${loaded[s] ? 'is-ready' : ''}`}
             />
           ))}
           <img
             ref={crispRef}
-            src={crispUrl}
+            src={sceneUrl('city', false)}
             alt=""
             decoding="async"
-            className={`atmosphere__layer atmosphere__layer--crisp ${crispUrl ? 'is-ready' : ''}`}
+            onLoad={markLoaded('crisp')}
+            className={`atmosphere__layer atmosphere__layer--crisp ${loaded.crisp ? 'is-ready' : ''}`}
           />
         </>
       )}

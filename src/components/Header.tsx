@@ -1,6 +1,6 @@
-import { forwardRef, useRef } from 'react'
-import { useT, type Lang } from '../i18n'
-import { ScrollTrigger, useGSAP } from '../lib/motion'
+import { forwardRef, useEffect, useRef } from 'react'
+import { loadDict, useT, type Lang } from '../i18n'
+import { onScrollFrame } from '../lib/scroll'
 import { homePath, switchLangPath, type Route } from '../router'
 import { Link } from './Link'
 import { MothLogo } from './MothLogo'
@@ -17,17 +17,7 @@ export const Header = forwardRef<HTMLButtonElement, HeaderProps>(function Header
   const otherLang: Lang = route.lang === 'es' ? 'en' : 'es'
 
   // Siempre visible; al bajar toma fondo para que el contenido no se mezcle.
-  useGSAP(() => {
-    ScrollTrigger.create({
-      start: 0,
-      end: 'max',
-      onUpdate: (self) => {
-        const el = ref.current
-        if (!el) return
-        el.classList.toggle('is-scrolled', self.scroll() > 40)
-      },
-    })
-  })
+  useEffect(() => onScrollFrame(() => ref.current?.classList.toggle('is-scrolled', window.scrollY > 40)), [])
 
   return (
     <header ref={ref} className={`header ${open ? 'is-open' : ''}`}>
@@ -46,6 +36,9 @@ export const Header = forwardRef<HTMLButtonElement, HeaderProps>(function Header
             hrefLang={otherLang}
             lang={otherLang}
             aria-label={`${t.header.otherLang}, ${otherLang === 'en' ? 'English' : 'Español'}`}
+            // pide el otro diccionario antes del clic, para que el cambio sea inmediato
+            onPointerEnter={() => void loadDict(otherLang)}
+            onFocus={() => void loadDict(otherLang)}
           >
             {t.header.otherLang}
           </Link>

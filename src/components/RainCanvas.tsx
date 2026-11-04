@@ -21,6 +21,9 @@ interface Ember {
 
 const RAIN_LAYERS = [0.1, 0.18, 0.28]
 
+// 30 fps alcanzan para la lluvia; sin tope, en pantallas de 120–144 Hz dibujaría el doble o más.
+const FRAME_MS = 1000 / 30
+
 // Brasa con brillo pre-renderizada: dibujar una imagen es mucho más barato que shadowBlur.
 function makeEmberSprite() {
   const size = 32
@@ -54,6 +57,7 @@ export function RainCanvas() {
     let drops: Drop[] = []
     let embers: Ember[] = []
     let frame = 0
+    let timer = 0
     let last = 0
 
     const newDrop = (randomY: boolean): Drop => ({
@@ -81,7 +85,7 @@ export function RainCanvas() {
       canvas.width = width * dpr
       canvas.height = height * dpr
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      const density = Math.min(160, Math.round((width * height) / (small ? 14000 : 10000)))
+      const density = Math.min(100, Math.round((width * height) / (small ? 22000 : 15000)))
       drops = Array.from({ length: density }, () => newDrop(true))
       embers = Array.from({ length: Math.round(density / 5) }, () => newEmber(true))
       if (reduceMotion) draw()
@@ -109,10 +113,14 @@ export function RainCanvas() {
       ctx.globalAlpha = 1
     }
 
+    // Duerme entre cuadros: pedir un requestAnimationFrame en cada vuelta obligaría al
+    // navegador a recorrer todo su ciclo de dibujo en cada frame de la pantalla.
+    const next = () => {
+      timer = window.setTimeout(() => (frame = requestAnimationFrame(step)), FRAME_MS - 6)
+    }
+
     const step = (now: number) => {
-      frame = requestAnimationFrame(step)
-      const interval = window.scrollY < window.innerHeight && width >= 760 ? 0 : 1000 / 30
-      if (last && now - last < interval - 4) return
+      next()
       // normaliza a 60 fps para que la velocidad no dependa de la pantalla
       const k = last ? Math.min((now - last) / 16.7, 3) : 1
       last = now
@@ -138,6 +146,7 @@ export function RainCanvas() {
     const sync = () => {
       const shouldRun = started && inView && !document.hidden && !reduceMotion
       cancelAnimationFrame(frame)
+      window.clearTimeout(timer)
       if (shouldRun) {
         last = 0
         frame = requestAnimationFrame(step)
@@ -174,6 +183,7 @@ export function RainCanvas() {
       if (hasIdle) cancelIdleCallback(idle as number)
       else clearTimeout(idle)
       cancelAnimationFrame(frame)
+      window.clearTimeout(timer)
       io.disconnect()
       ro.disconnect()
       document.removeEventListener('visibilitychange', sync)

@@ -4,8 +4,9 @@ import { useT, type Lang, type SectionId } from '../i18n'
 import { gsap, lockScroll, useGSAP } from '../lib/motion'
 import { homePath, navigate } from '../router'
 import { ExternalButton } from './ExternalButton'
+import type { Project } from '../data/projects'
 import { GithubIcon, PatreonIcon, YoutubeIcon } from './Icons'
-import { MothLogo } from './MothLogo'
+import { MenuTerminal } from './MenuTerminal'
 
 const SECTIONS: SectionId[] = ['top', 'proyectos', 'por-que-linux', 'modelo', 'vision', 'canales']
 
@@ -14,9 +15,10 @@ interface MenuOverlayProps {
   onClose: () => void
   lang: Lang
   returnFocusRef: RefObject<HTMLButtonElement | null>
+  projects: Project[]
 }
 
-export function MenuOverlay({ open, onClose, lang, returnFocusRef }: MenuOverlayProps) {
+export function MenuOverlay({ open, onClose, lang, returnFocusRef, projects }: MenuOverlayProps) {
   const t = useT()
   const rootRef = useRef<HTMLDivElement>(null)
   const tlRef = useRef<gsap.core.Timeline | null>(null)
@@ -113,18 +115,7 @@ export function MenuOverlay({ open, onClose, lang, returnFocusRef }: MenuOverlay
         </nav>
 
         <div className="menu__preview menu__fade" aria-hidden="true">
-          {SECTIONS.map((id, i) => (
-            <div key={id} className={`menu__preview-item ${active === i ? 'is-active' : ''}`}>
-              <MothLogo size={180} animated />
-              <div className="menu__words">
-                {t.menu.items[id].words.map((w) => (
-                  <span key={w} className="menu__word-mask">
-                    <span className="menu__word">{w}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
+          <MenuTerminal id={SECTIONS[active]} index={active} total={SECTIONS.length} projects={projects} />
         </div>
 
         <div className="menu__footer">

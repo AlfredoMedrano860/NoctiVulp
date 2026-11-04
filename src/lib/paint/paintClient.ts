@@ -1,56 +1,37 @@
 import type { Category } from '../../data/projects'
-import type { ArtKind } from './sizes'
-import type { CoverItem, PaintJob, PaintRequest, PaintResult } from './paint.worker'
-import type { Scene } from './scenes'
+import type { CoverItem, PaintJob, PaintResult } from './paint.worker'
 
-let workerUsable = typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined'
+let workerUsable =
+  typeof Worker !== 'undefined' &&
+  typeof OffscreenCanvas !== 'undefined' &&
+  typeof OffscreenCanvas.prototype.convertToBlob === 'function'
 let worker: Worker | null = null
 let nextId = 0
-const pending = new Map<number, { resolve: (result: PaintResult | null) => void; fallback: () => Promise<PaintResult | null> }>()
+const pending = new Map<number, (blobs: Blob[] | null) => void>()
 
 function getWorker() {
   if (worker) return worker
   worker = new Worker(new URL('./paint.worker.ts', import.meta.url), { type: 'module' })
   worker.onmessage = ({ data }: MessageEvent<PaintResult>) => {
-    pending.get(data.id)?.resolve(data)
+    pending.get(data.id)?.(data.blobs)
     pending.delete(data.id)
   }
   worker.onerror = () => {
     workerUsable = false
     worker?.terminate()
     worker = null
-    for (const [id, job] of pending) {
-      void job.fallback().then(job.resolve)
-      pending.delete(id)
-    }
+    for (const resolve of pending.values()) resolve(null)
+    pending.clear()
   }
   return worker
 }
 
-function run(job: PaintRequest, fallback: () => Promise<PaintResult | null>) {
-  if (!workerUsable) return fallback()
-  return new Promise<PaintResult | null>((resolve) => {
+// Portadas generadas en el worker, ya en webp. null: sin worker (quien llama las dibuja en el hilo principal).
+export function paintCoverBlobs(items: CoverItem[], labels: Record<Category, string>): Promise<Blob[] | null> {
+  if (!workerUsable) return Promise.resolve(null)
+  return new Promise((resolve) => {
     const id = ++nextId
-    pending.set(id, { resolve, fallback })
-    getWorker().postMessage({ ...job, id } as PaintJob)
+    pending.set(id, resolve)
+    getWorker().postMessage({ id, items, labels } satisfies PaintJob)
   })
 }
-
-export const paintSceneBlobs = (scene: Scene) =>
-  run({ type: 'scene', scene }, () => import('./jobs').then(async ({ renderScene }) => ({ id: 0, blobs: await renderScene(scene) }))).then(
-    (result) => result?.blobs ?? null,
-  )
-
-export const paintArtBlob = (kind: ArtKind) =>
-  run({ type: 'art', kind }, () =>
-    import('./jobs').then(async ({ renderArt }) => {
-      const blob = await renderArt(kind)
-      return { id: 0, blobs: blob ? [blob] : null }
-    }),
-  ).then((result) => result?.blobs?.[0] ?? null)
-
-// Portadas generadas en el worker. null: sin worker (quien llama las dibuja en el hilo principal).
-export const paintCoverBitmaps = (items: CoverItem[], labels: Record<Category, string>) =>
-  workerUsable
-    ? run({ type: 'covers', items, labels }, async () => null).then((result) => result?.bitmaps ?? null)
-    : Promise.resolve(null)
