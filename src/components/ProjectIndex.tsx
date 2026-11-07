@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CATEGORIES, type Category, type Project } from '../data/projects'
 import { useLang, useT } from '../i18n'
 import { gsap, useGSAP } from '../lib/motion'
@@ -9,6 +9,11 @@ import { Link } from './Link'
 import { SplitReveal } from './SplitReveal'
 
 type Filter = Category | 'all'
+
+// Cuánto tiene que quedarse el cursor sobre una fila para abrirla. Al pasar rápido por la
+// lista no se abre ninguna: abrir una fila anima su alto y empuja a las de abajo, y abrir
+// y cerrar varias seguidas trababa la página.
+const HOVER_DELAY_MS = 90
 
 interface ProjectIndexProps {
   projects: Project[]
@@ -22,6 +27,16 @@ export function ProjectIndex({ projects, artUrls }: ProjectIndexProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const [filter, setFilter] = useState<Filter>('all')
   const [hovered, setHovered] = useState<number | null>(null)
+  const hoverTimer = useRef(0)
+  const hoverLater = (index: number) => {
+    window.clearTimeout(hoverTimer.current)
+    hoverTimer.current = window.setTimeout(() => setHovered(index), HOVER_DELAY_MS)
+  }
+  const clearHover = () => {
+    window.clearTimeout(hoverTimer.current)
+    setHovered(null)
+  }
+  useEffect(() => () => window.clearTimeout(hoverTimer.current), [])
 
   const counts = useMemo(() => {
     const c: Partial<Record<Category, number>> = {}
@@ -73,16 +88,16 @@ export function ProjectIndex({ projects, artUrls }: ProjectIndexProps) {
 
         <ul
           className={`index__list ${hovered !== null ? 'has-hover' : ''}`}
-          onPointerLeave={() => setHovered(null)}
+          onPointerLeave={clearHover}
         >
           {rows.map(({ p, i }) => (
-            <li key={p.name}>
+            <li key={p.name} className={hovered === i ? 'is-current' : undefined}>
               <Link
                 to={projectPath(lang, p.name)}
                 className={`index__row ${hovered === i ? 'is-open' : ''}`}
-                onPointerEnter={() => setHovered(i)}
+                onPointerEnter={() => hoverLater(i)}
                 onFocus={() => setHovered(i)}
-                onBlur={() => setHovered(null)}
+                onBlur={clearHover}
               >
                 <span className="index__num">{String(i + 1).padStart(2, '0')}</span>
                 <span className="index__main">

@@ -7,7 +7,6 @@ const en: Dict = {
       'Open source tools for people coming to Linux and for those who already use it every day. Desktop, gaming and modding.',
     locale: 'en_US',
   },
-  skip: 'Skip to content',
   header: { status: 'Open for commissions', menu: 'Menu', close: 'Close', home: 'Home', otherLang: 'ES' },
   menu: {
     label: 'Main menu',
@@ -120,6 +119,7 @@ const en: Dict = {
   footer: {
     title: ['Using Linux or ', 'about to try it?', ''],
     text: 'Check out the repos, drop by the channel and, if something helped you, support it on Patreon.',
+    developedBy: 'Developed by',
   },
   project: {
     back: 'All projects',
@@ -137,6 +137,25 @@ const en: Dict = {
     notFoundText: 'The repo may have been renamed or is no longer public.',
     backHome: 'Back home',
     noDescription: 'Work in progress.',
+  },
+  chat: {
+    eyebrow: '~/help',
+    title: 'Ask Nocti',
+    welcome: "Hi! I'm Nocti. Ask me about the projects, how it is paid, commissions or the channels, or pick a question below.",
+    fallback: "I don't know that one. I can tell you about the projects (type the name of one), Patreon, commissions, the license, why Linux and the channels.",
+    bubble: 'Questions? Ask me!',
+    openLauncher: 'Open chat with Nocti',
+    closeLauncher: 'Close chat with Nocti',
+    close: 'Close chat',
+    conversation: 'Conversation',
+    botSays: 'Nocti says:',
+    youSaid: 'You said:',
+    typing: 'Nocti is typing',
+    suggestionsLabel: 'Suggested questions',
+    suggestions: ['What projects are there?', 'Is it free?', 'Do you take commissions?', 'Why Linux?', 'Where is the code?', 'Do you have a YouTube channel?'],
+    inputLabel: 'Your question',
+    placeholder: 'Type a question…',
+    send: 'Send question',
   },
   a11y: {
     open: 'Accessibility menu',

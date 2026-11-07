@@ -9,6 +9,9 @@ import { MothLogo } from './MothLogo'
 import { PaintedArt } from './PaintedArt'
 import { SplitReveal } from './SplitReveal'
 
+// Perfil de quien desarrolló el sitio (crédito del pie de página).
+const DEVELOPER_LINKEDIN = 'https://www.linkedin.com/in/josealfredomedrano'
+
 const YEAR = new Date().getFullYear()
 
 export function Footer() {
@@ -81,6 +84,12 @@ export function Footer() {
           </span>
           <span className="text-muted">
             {t.header.status} · © {YEAR} NoctiVulp
+          </span>
+          <span className="footer__credit">
+            {t.footer.developedBy}{' '}
+            <a href={DEVELOPER_LINKEDIN} target="_blank" rel="noopener noreferrer">
+              Alfredo Medrano
+            </a>
           </span>
         </div>
       </div>
