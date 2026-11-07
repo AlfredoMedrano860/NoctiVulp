@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { AccessibilityMenu } from './components/AccessibilityMenu'
 import { Atmosphere } from './components/Atmosphere'
 import { BackToTop } from './components/BackToTop'
+import { ChatBot } from './components/chatbot/ChatBot'
 import { Deferred } from './components/Deferred'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
@@ -87,9 +88,6 @@ function App() {
 
   return (
     <LangContext.Provider value={lang}>
-      <a href="#main" className="skip-link">
-        {t.skip}
-      </a>
       <Atmosphere vivid={route.page === 'home'} painted={PAINTED_BACKGROUND} pageKey={pageKey} mounted={mounted} />
       <ScrollProgress />
       <Header ref={menuBtnRef} open={menuOpen} onToggle={toggleMenu} route={route} />
@@ -106,6 +104,7 @@ function App() {
           <Footer />
         </Deferred>
       </div>
+      <ChatBot key={lang} projects={projects} />
       <BackToTop />
       <AccessibilityMenu />
       <ReadingGuide />

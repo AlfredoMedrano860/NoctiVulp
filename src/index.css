@@ -1282,12 +1282,13 @@ a:hover .moth--hover .moth__wing {
   isolation: isolate;
 }
 
-/* GSAP anima la opacidad de la fila: el atenuado va en los hijos */
-.index__row > * {
+/* GSAP anima la opacidad de la fila al aparecer: el atenuado va en el <li> que la
+   contiene (una sola transición por fila, en vez de una por cada parte de la fila) */
+.index__list > li {
   transition: opacity 0.4s ease;
 }
 
-.index__list.has-hover .index__row:not(.is-open) > * {
+.index__list.has-hover > li:not(.is-current) {
   opacity: 0.35;
 }
 
@@ -1423,7 +1424,11 @@ a:hover .moth--hover .moth__wing {
   border-radius: 50%;
   border: 1px solid var(--border);
   color: var(--muted);
-  transition: all 0.4s var(--ease-out);
+  transition:
+    background-color 0.4s var(--ease-out),
+    border-color 0.4s var(--ease-out),
+    color 0.4s var(--ease-out),
+    transform 0.4s var(--ease-out);
 }
 
 .index__row.is-open .index__arrow {
@@ -1502,9 +1507,17 @@ a:hover .moth--hover .moth__wing {
   height: 100%;
 }
 
+/* las columnas pueden encogerse por debajo de la palabra más larga: con letra grande o
+   para dislexia, el texto se parte en vez de sacar la tarjeta de la pantalla */
+.grid > * {
+  min-width: 0;
+}
+
 .card {
   position: relative;
+  min-width: 0;
   height: 100%;
+  overflow-wrap: break-word;
   padding: 28px;
   border-radius: var(--radius);
   background: var(--surface);
@@ -1926,24 +1939,6 @@ a:hover .moth--hover .moth__wing {
 }
 
 /* ---------- accesibilidad ---------- */
-.skip-link {
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  z-index: 300;
-  padding: 10px 18px;
-  border-radius: 999px;
-  background: var(--fire);
-  color: #160a02;
-  font-weight: 600;
-  transform: translateY(-200%);
-  transition: transform 0.3s var(--ease-out);
-}
-
-.skip-link:focus {
-  transform: none;
-}
-
 /* ---------- header: idioma ---------- */
 .header__actions {
   display: flex;
@@ -3844,7 +3839,65 @@ html.big-cursor * {
   font-size: 0.78rem;
 }
 
-@media (max-width: 380px) {
+
+/* ---------- sin barras de scroll ----------
+   Ni en la página ni en el panel de accesibilidad: se sigue desplazando igual (rueda,
+   teclado, dedo) y la barra de progreso de arriba indica cuánto falta. */
+html,
+.a11y-drawer__body {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+.a11y-drawer__body::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- el logo es una marca, no texto de lectura ----------
+   Con la letra para dislexia o el espaciado ancho el logo crecía y sacaba el menú de la
+   cabecera (y el NoctiVulp grande del pie no cabía): se queda con su letra. */
+html.dyslexia-font :is(.brand, .footer__wordmark),
+html.dyslexia-font :is(.brand, .footer__wordmark) * {
+  font-family: var(--font-title) !important;
+}
+
+html.text-spacing-mode :is(.brand, .footer__wordmark) {
+  word-spacing: normal;
+}
+
+.brand {
+  min-width: 0;
+}
+
+/* el NoctiVulp grande del pie se ajusta al ancho en vez de salirse */
+.footer__wordmark {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(3rem, 18vw, 17rem);
+}
+
+/* crédito de quien desarrolló el sitio */
+.footer__credit {
+  color: var(--muted);
+}
+
+.footer__credit a {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 179, 71, 0.45);
+  text-underline-offset: 3px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.footer__credit a:hover {
+  color: var(--fire);
+  text-decoration-color: var(--fire);
+}
+
+/* en celular el botón del menú es solo el ícono, para que la cabecera quepa aunque el
+   texto esté agrandado */
+@media (max-width: 480px) {
   .menu-btn {
     padding: 10px;
   }
@@ -3860,4 +3913,35 @@ html.big-cursor * {
   .header__actions {
     gap: 8px;
   }
+}
+
+/* los botones nunca más anchos que su tarjeta: si el texto agrandado no cabe, parte en
+   dos renglones */
+.btn {
+  max-width: 100%;
+}
+
+@media (max-width: 480px) {
+  .btn {
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* la línea de terminal del hero queda en un renglón: con el texto agrandado, la letra
+     se limita a lo que cabe en el ancho de la pantalla */
+  .hero__term {
+    font-size: min(0.85rem, 3.5vw);
+  }
+}
+
+/* la línea de terminal es código: siempre en letra monoespaciada y sin espaciado extra,
+   también con la letra para dislexia */
+html.dyslexia-font .hero__term,
+html.dyslexia-font .hero__term * {
+  font-family: var(--font-mono) !important;
+}
+
+html.text-spacing-mode .hero__term {
+  letter-spacing: normal;
+  word-spacing: normal;
 }

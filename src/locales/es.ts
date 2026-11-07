@@ -8,7 +8,6 @@ const es: Dict = {
       'Herramientas de código abierto para quien llega a Linux y para quien ya lo usa a diario. Escritorio, gaming y modding.',
     locale: 'es_ES',
   },
-  skip: 'Saltar al contenido',
   header: { status: 'Aceptando comisiones', menu: 'Menú', close: 'Cerrar', home: 'Inicio', otherLang: 'EN' },
   menu: {
     label: 'Menú principal',
@@ -121,6 +120,7 @@ const es: Dict = {
   footer: {
     title: ['¿Usas Linux o estás ', 'por probarlo?', ''],
     text: 'Revisa los repos, pásate por el canal y, si algo te sirvió, apóyalo en Patreon.',
+    developedBy: 'Desarrollado por',
   },
   project: {
     back: 'Todos los proyectos',
@@ -138,6 +138,25 @@ const es: Dict = {
     notFoundText: 'Puede que el repo haya cambiado de nombre o que ya no sea público.',
     backHome: 'Volver al inicio',
     noDescription: 'Proyecto en desarrollo.',
+  },
+  chat: {
+    eyebrow: '~/ayuda',
+    title: 'Pregúntale a Nocti',
+    welcome: '¡Hola! Soy Nocti. Pregúntame por los proyectos, cómo se paga, las comisiones o los canales, o elige una pregunta de abajo.',
+    fallback: 'Esa no me la sé. Puedo contarte de los proyectos (escribe el nombre de uno), Patreon, las comisiones, la licencia, por qué Linux y los canales.',
+    bubble: '¿Dudas? ¡Pregúntame!',
+    openLauncher: 'Abrir el chat con Nocti',
+    closeLauncher: 'Cerrar el chat con Nocti',
+    close: 'Cerrar el chat',
+    conversation: 'Conversación',
+    botSays: 'Nocti dice:',
+    youSaid: 'Tú dijiste:',
+    typing: 'Nocti está escribiendo',
+    suggestionsLabel: 'Preguntas sugeridas',
+    suggestions: ['¿Qué proyectos hay?', '¿Es gratis?', '¿Aceptas comisiones?', '¿Por qué Linux?', '¿Dónde está el código?', '¿Tienes canal de YouTube?'],
+    inputLabel: 'Tu pregunta',
+    placeholder: 'Escribe una pregunta…',
+    send: 'Enviar pregunta',
   },
   a11y: {
     open: 'Menú de accesibilidad',

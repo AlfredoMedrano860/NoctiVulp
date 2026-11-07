@@ -11,7 +11,6 @@ type Highlighted = [string, string, string]
 
 export interface Dict {
   meta: { title: string; description: string; locale: string }
-  skip: string
   header: { status: string; menu: string; close: string; home: string; otherLang: string }
   menu: { label: string; items: Record<SectionId, { label: string; words: [string, string] }> }
   hero: {
@@ -60,7 +59,7 @@ export interface Dict {
     cta: string
     soon: string
   }
-  footer: { title: Highlighted; text: string }
+  footer: { title: Highlighted; text: string; developedBy: string }
   project: {
     back: string
     github: string
@@ -122,6 +121,25 @@ export interface Dict {
     toolsHint: string
     reset: string
     toTop: string
+  }
+  chat: {
+    eyebrow: string
+    title: string
+    welcome: string
+    fallback: string
+    bubble: string
+    openLauncher: string
+    closeLauncher: string
+    close: string
+    conversation: string
+    botSays: string
+    youSaid: string
+    typing: string
+    suggestionsLabel: string
+    suggestions: string[]
+    inputLabel: string
+    placeholder: string
+    send: string
   }
 }
 
