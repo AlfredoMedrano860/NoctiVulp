@@ -69,6 +69,7 @@ export interface Dict {
     readmeLoading: string
     readmeError: string
     readmeOpen: string
+    readmeOnlySpanish: string
     gallery: string
     prev: string
     next: string
