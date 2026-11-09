@@ -131,6 +131,7 @@ const es: Dict = {
     readmeLoading: 'Cargando el README…',
     readmeError: 'No se pudo cargar el README.',
     readmeOpen: 'Leerlo en GitHub',
+    readmeOnlySpanish: 'Este README solo está disponible en español por ahora.',
     gallery: 'Capturas',
     prev: 'Anterior',
     next: 'Siguiente',
