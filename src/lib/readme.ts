@@ -2,7 +2,7 @@ import DOMPurify from 'dompurify'
 import { GITHUB_USER } from '../data/github'
 
 const API = 'https://api.github.com/repos'
-const cache = new Map<string, Promise<string>>()
+const cache = new Map<string, Promise<Readme>>()
 
 function isRelative(url: string) {
   return !/^[a-z][a-z0-9+.-]*:/i.test(url) && !url.startsWith('//') && !url.startsWith('#')
@@ -59,21 +59,40 @@ export function cleanReadme(html: string, repo: string): string {
   return container.innerHTML
 }
 
-export function fetchReadme(repo: string): Promise<string> {
-  const cached = cache.get(repo)
-  if (cached) return cached
-  const request = fetch(`${API}/${GITHUB_USER}/${encodeURIComponent(repo)}/readme`, {
+export interface Readme {
+  html: string
+  // true cuando se pidió inglés pero el repo solo tiene el README en español
+  fallback: boolean
+}
+
+function requestReadme(repo: string, path: string) {
+  return fetch(`${API}/${GITHUB_USER}/${encodeURIComponent(repo)}/${path}`, {
     credentials: 'omit',
     referrerPolicy: 'no-referrer',
     headers: { Accept: 'application/vnd.github.html+json' },
+  }).then((res) => {
+    if (!res.ok) throw new Error(`README ${res.status}`)
+    return res.text()
   })
-    .then((res) => {
-      if (!res.ok) throw new Error(`README ${res.status}`)
-      return res.text()
-    })
-    .then((html) => cleanReadme(html.slice(0, 400_000), repo))
-  request.catch(() => cache.delete(repo))
-  cache.set(repo, request)
+}
+
+const readHtml = (repo: string) => (html: string) => cleanReadme(html.slice(0, 400_000), repo)
+
+// El README principal está en español. En inglés se busca README.en.md y, si el repo no lo tiene,
+// se usa el principal marcado como fallback para avisar en la página.
+export function fetchReadme(repo: string, lang: 'es' | 'en' = 'es'): Promise<Readme> {
+  const key = `${lang}:${repo}`
+  const cached = cache.get(key)
+  if (cached) return cached
+  const main = () => requestReadme(repo, 'readme').then(readHtml(repo)).then((html) => ({ html, fallback: lang === 'en' }))
+  const request =
+    lang === 'en'
+      ? requestReadme(repo, 'contents/README.en.md')
+          .then(readHtml(repo))
+          .then((html) => ({ html, fallback: false }), main)
+      : main()
+  request.catch(() => cache.delete(key))
+  cache.set(key, request)
   return request
 }
 

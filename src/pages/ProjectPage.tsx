@@ -12,25 +12,25 @@ import { Link } from '../components/Link'
 import { Reveal } from '../components/Reveal'
 import { SplitReveal } from '../components/SplitReveal'
 
-type ReadmeState = { status: 'loading' } | { status: 'ok'; html: string } | { status: 'error' }
+type ReadmeState = { status: 'loading' } | { status: 'ok'; html: string; fallback: boolean } | { status: 'error' }
 
-function useReadme(repo: string | undefined) {
-  const [state, setState] = useState<{ repo?: string; value: ReadmeState }>({ value: { status: 'loading' } })
+function useReadme(repo: string | undefined, lang: 'es' | 'en') {
+  const [state, setState] = useState<{ repo?: string; lang?: string; value: ReadmeState }>({ value: { status: 'loading' } })
 
   useEffect(() => {
     if (!repo) return
     let cancelled = false
-    fetchReadme(repo).then(
-      (html) => !cancelled && setState({ repo, value: { status: 'ok', html } }),
-      () => !cancelled && setState({ repo, value: { status: 'error' } }),
+    fetchReadme(repo, lang).then(
+      (readme) => !cancelled && setState({ repo, lang, value: { status: 'ok', ...readme } }),
+      () => !cancelled && setState({ repo, lang, value: { status: 'error' } }),
     )
     return () => {
       cancelled = true
     }
-  }, [repo])
+  }, [repo, lang])
 
   // si cambió de proyecto y aún no llega el nuevo README, se muestra "cargando"
-  return state.repo === repo ? state.value : ({ status: 'loading' } as ReadmeState)
+  return state.repo === repo && state.lang === lang ? state.value : ({ status: 'loading' } as ReadmeState)
 }
 
 function useRelease(repo: string | undefined) {
@@ -57,7 +57,7 @@ export function ProjectPage({ name, projects, art }: ProjectPageProps) {
   const lang = useLang()
   const index = projects.findIndex((p) => p.name.toLowerCase() === name.toLowerCase())
   const project = index >= 0 ? projects[index] : undefined
-  const readme = useReadme(project?.name)
+  const readme = useReadme(project?.name, lang)
   const release = useRelease(project?.name)
 
   useEffect(() => {
@@ -181,6 +181,7 @@ export function ProjectPage({ name, projects, art }: ProjectPageProps) {
       <section className="section pp-readme-wrap">
         <div className="container">
           <p className="eyebrow">{t.project.readme}</p>
+          {readme.status === 'ok' && readme.fallback && <p className="readme-note">{t.project.readmeOnlySpanish}</p>}
           {readme.status === 'ok' && <article className="readme" dangerouslySetInnerHTML={{ __html: readme.html }} />}
           {readme.status === 'loading' && <p className="readme-state">{t.project.readmeLoading}</p>}
           {readme.status === 'error' && (

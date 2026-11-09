@@ -2253,6 +2253,13 @@ a:hover .moth--hover .moth__wing {
   color: var(--muted);
 }
 
+.readme-note {
+  margin: 0 0 16px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 /* README renderizado por GitHub (ya saneado y sin clases) */
 .readme {
   max-width: 820px;
