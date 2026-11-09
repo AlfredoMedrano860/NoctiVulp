@@ -2929,7 +2929,7 @@ html.color-tritanopia {
 }
 
 /* resaltar títulos */
-html.highlight-headings :is(h1, h2, h3):not([data-a11y-ui] *) {
+html.highlight-headings :is(h1, h2, h3) {
   outline: 2px dashed var(--amber);
   outline-offset: 6px;
   border-radius: 4px;
@@ -2949,7 +2949,7 @@ html.strong-focus :focus-visible {
 }
 
 /* alinear texto a la izquierda */
-html.align-left :is(p, h1, h2, h3, li, .section__head, .cta, .statement):not([data-a11y-ui] *) {
+html.align-left :is(p, h1, h2, h3, li, .section__head, .cta, .statement) {
   text-align: left !important;
 }
 
