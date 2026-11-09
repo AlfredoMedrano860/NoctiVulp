@@ -4,7 +4,6 @@ import type { Project } from '../../data/projects'
 import { useLang, useT } from '../../i18n'
 import { findReply } from '../../lib/chatbot'
 import { homePath, navigate, projectPath } from '../../router'
-import { MothLogo } from '../MothLogo'
 import './chatbot.css'
 
 // Chatbot "Nocti": un botón flotante abajo a la izquierda (gemelo del de accesibilidad)
@@ -43,6 +42,25 @@ function CloseIcon({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
       <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  )
+}
+
+// Carita del bot: redonda, del color ámbar/fuego de las alas de la polilla, con ojos que parpadean.
+function BotFace({ size = 30, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" className={`chat__face ${className}`} aria-hidden="true">
+      <circle cx="16" cy="16" r="14" fill="var(--amber)" />
+      <path d="M2.6 19.5 A14 14 0 0 0 29.4 19.5 A14 10 0 0 1 2.6 19.5 Z" fill="var(--fire)" opacity="0.55" />
+      <circle cx="8.6" cy="19.4" r="2.2" fill="var(--fire)" opacity="0.75" />
+      <circle cx="23.4" cy="19.4" r="2.2" fill="var(--fire)" opacity="0.75" />
+      <g className="chat__eyes">
+        <ellipse cx="11.2" cy="14.2" rx="2.4" ry="3.1" fill="var(--bg)" />
+        <ellipse cx="20.8" cy="14.2" rx="2.4" ry="3.1" fill="var(--bg)" />
+        <circle cx="12" cy="13.1" r="0.9" fill="#fff" />
+        <circle cx="21.6" cy="13.1" r="0.9" fill="#fff" />
+      </g>
+      <path d="M13.2 20.6 Q16 23 18.8 20.6" stroke="var(--bg)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
     </svg>
   )
 }
@@ -146,7 +164,7 @@ export function ChatBot({ projects }: { projects: Project[] }) {
               <span />
             </span>
             <h2 id={`${id}-title`} className="chat__title">
-              <MothLogo size={20} animated="hover" className={`chat__moth ${thinking ? 'is-thinking' : ''}`} />
+              <BotFace size={20} className={thinking ? 'is-thinking' : ''} />
               {t.title}
               <span className="chat__path">{t.eyebrow}</span>
             </h2>
@@ -237,7 +255,7 @@ export function ChatBot({ projects }: { projects: Project[] }) {
         aria-expanded={open}
         aria-label={open ? t.closeLauncher : t.openLauncher}
       >
-        {open ? <CloseIcon /> : <MothLogo size={30} animated="hover" />}
+        {open ? <CloseIcon /> : <BotFace size={30} />}
       </button>
     </div>
   )

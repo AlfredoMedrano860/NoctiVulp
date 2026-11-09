@@ -161,8 +161,42 @@
 }
 
 /* mientras piensa, la polilla del título aletea */
-.chat__moth.is-thinking .moth__wing {
-  animation: flap 0.35s ease-in-out infinite;
+/* carita del bot: parpadea sola de vez en cuando y al pasar el cursor; mientras piensa mira a los lados */
+.chat__face {
+  display: block;
+  flex: none;
+}
+
+.chat__eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: chat-blink 5s ease-in-out infinite;
+}
+
+.chat__launcher:hover .chat__eyes {
+  animation: chat-blink 0.9s ease-in-out;
+}
+
+.chat__face.is-thinking .chat__eyes {
+  animation: chat-look 1.2s ease-in-out infinite;
+}
+
+@keyframes chat-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+@keyframes chat-look {
+  0%, 100% { transform: translateX(-1.4px); }
+  50% { transform: translateX(1.4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat__eyes,
+  .chat__launcher:hover .chat__eyes,
+  .chat__face.is-thinking .chat__eyes {
+    animation: none;
+  }
 }
 
 .chat__close {
