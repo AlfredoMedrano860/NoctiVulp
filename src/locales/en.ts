@@ -131,6 +131,8 @@ const en: Dict = {
     readmeError: "Couldn't load the README.",
     readmeOpen: 'Read it on GitHub',
     readmeOnlySpanish: 'This README is only available in Spanish for now.',
+    readmeTranslating: 'Translating this README from Spanish…',
+    readmeTranslated: 'Machine-translated from Spanish.',
     gallery: 'Screenshots',
     prev: 'Previous',
     next: 'Next',

@@ -9,7 +9,10 @@ export async function renderScene(scene: Scene): Promise<Blob[] | null> {
   if (!(await PAINTERS[scene](source, () => false))) return null
   const soft = createCanvas(SCENE_W, SCENE_H)
   paintSoft(source, soft, scene === 'city' ? 8 : 6, scene === 'city' ? 0.5 : 0.42)
-  const blobs = await Promise.all((scene === 'city' ? [soft, source] : [soft]).map((canvas) => canvasToImageBlob(canvas, 'image/webp', 0.86)))
+  // la ciudad nítida solo se ve arriba y se desvanece al bajar: 0.65 basta y pesa la mitad
+  const blobs = await Promise.all(
+    (scene === 'city' ? [soft, source] : [soft]).map((canvas, i) => canvasToImageBlob(canvas, 'image/webp', i === 1 ? 0.65 : 0.86)),
+  )
   return blobs.every(Boolean) ? (blobs as Blob[]) : null
 }
 

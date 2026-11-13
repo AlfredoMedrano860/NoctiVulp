@@ -96,6 +96,69 @@ export function fetchReadme(repo: string, lang: 'es' | 'en' = 'es'): Promise<Rea
   return request
 }
 
+const UNTRANSLATED = new Set(['CODE', 'PRE', 'KBD', 'SAMP'])
+const MAX_TEXT = 2000
+const BATCH_TEXTS = 400
+const BATCH_CHARS = 40_000
+const translations = new Map<string, Promise<string>>()
+
+async function postTranslate(texts: string[]): Promise<string[]> {
+  const res = await fetch('/api/translate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ texts, source: 'es', target: 'en' }),
+  })
+  if (!res.ok) throw new Error(`translate ${res.status}`)
+  const data: unknown = await res.json()
+  const out = (data as { texts?: unknown }).texts
+  if (!Array.isArray(out) || out.length !== texts.length || !out.every((t) => typeof t === 'string')) throw new Error('translate')
+  return out as string[]
+}
+
+async function translateHtml(html: string): Promise<string> {
+  const doc = new DOMParser().parseFromString(`<body>${html}</body>`, 'text/html')
+  const nodes: Text[] = []
+  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT)
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const text = node as Text
+    let el = text.parentElement
+    let skip = false
+    while (el && el !== doc.body) {
+      if (UNTRANSLATED.has(el.tagName)) skip = true
+      el = el.parentElement
+    }
+    const value = text.nodeValue ?? ''
+    if (!skip && /\p{L}{2,}/u.test(value) && value.trim().length <= MAX_TEXT) nodes.push(text)
+  }
+  if (!nodes.length) return html
+
+  const parts = nodes.map((node) => {
+    const value = node.nodeValue ?? ''
+    return { lead: value.match(/^\s*/)?.[0] ?? '', trail: value.match(/\s*$/)?.[0] ?? '', text: value.trim().replace(/\s+/g, ' ') }
+  })
+
+  const translated: string[] = []
+  for (let start = 0; start < parts.length; ) {
+    let end = start
+    let chars = 0
+    while (end < parts.length && end - start < BATCH_TEXTS && chars + parts[end].text.length <= BATCH_CHARS) chars += parts[end++].text.length
+    translated.push(...(await postTranslate(parts.slice(start, end).map((p) => p.text))))
+    start = end
+  }
+  nodes.forEach((node, i) => (node.nodeValue = parts[i].lead + translated[i] + parts[i].trail))
+  return doc.body.innerHTML
+}
+
+// README en español traducido al inglés por la función de Cloudflare (/api/translate).
+export function translateReadme(repo: string, html: string): Promise<string> {
+  const cached = translations.get(repo)
+  if (cached) return cached
+  const request = translateHtml(html)
+  request.catch(() => translations.delete(repo))
+  translations.set(repo, request)
+  return request
+}
+
 export interface Release {
   tag: string
   url: string

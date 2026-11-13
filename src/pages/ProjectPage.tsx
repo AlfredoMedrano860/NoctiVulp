@@ -4,7 +4,7 @@ import { LINKS, PATREON_PROJECTS } from '../config'
 import type { Project } from '../data/projects'
 import type { ProjectArt } from '../hooks/useProjectArt'
 import { useLang, useT } from '../i18n'
-import { fetchLatestRelease, fetchReadme, type Release } from '../lib/readme'
+import { fetchLatestRelease, fetchReadme, translateReadme, type Release } from '../lib/readme'
 import { homePath, projectPath } from '../router'
 import { ExternalButton } from '../components/ExternalButton'
 import { ArrowIcon, GithubIcon, PatreonIcon } from '../components/Icons'
@@ -12,7 +12,11 @@ import { Link } from '../components/Link'
 import { Reveal } from '../components/Reveal'
 import { SplitReveal } from '../components/SplitReveal'
 
-type ReadmeState = { status: 'loading' } | { status: 'ok'; html: string; fallback: boolean } | { status: 'error' }
+type Translation = 'pending' | 'done' | 'failed'
+type ReadmeState =
+  | { status: 'loading' }
+  | { status: 'ok'; html: string; fallback: boolean; translation?: Translation }
+  | { status: 'error' }
 
 function useReadme(repo: string | undefined, lang: 'es' | 'en') {
   const [state, setState] = useState<{ repo?: string; lang?: string; value: ReadmeState }>({ value: { status: 'loading' } })
@@ -21,7 +25,16 @@ function useReadme(repo: string | undefined, lang: 'es' | 'en') {
     if (!repo) return
     let cancelled = false
     fetchReadme(repo, lang).then(
-      (readme) => !cancelled && setState({ repo, lang, value: { status: 'ok', ...readme } }),
+      (readme) => {
+        if (cancelled) return
+        const translate = lang === 'en' && readme.fallback
+        setState({ repo, lang, value: { status: 'ok', ...readme, translation: translate ? 'pending' : undefined } })
+        if (!translate) return
+        translateReadme(repo, readme.html).then(
+          (html) => !cancelled && setState({ repo, lang, value: { status: 'ok', html, fallback: true, translation: 'done' } }),
+          () => !cancelled && setState({ repo, lang, value: { status: 'ok', ...readme, translation: 'failed' } }),
+        )
+      },
       () => !cancelled && setState({ repo, lang, value: { status: 'error' } }),
     )
     return () => {
@@ -181,7 +194,15 @@ export function ProjectPage({ name, projects, art }: ProjectPageProps) {
       <section className="section pp-readme-wrap">
         <div className="container">
           <p className="eyebrow">{t.project.readme}</p>
-          {readme.status === 'ok' && readme.fallback && <p className="readme-note">{t.project.readmeOnlySpanish}</p>}
+          {readme.status === 'ok' && readme.fallback && (
+            <p className="readme-note" aria-live="polite">
+              {readme.translation === 'pending'
+                ? t.project.readmeTranslating
+                : readme.translation === 'done'
+                  ? t.project.readmeTranslated
+                  : t.project.readmeOnlySpanish}
+            </p>
+          )}
           {readme.status === 'ok' && <article className="readme" dangerouslySetInnerHTML={{ __html: readme.html }} />}
           {readme.status === 'loading' && <p className="readme-state">{t.project.readmeLoading}</p>}
           {readme.status === 'error' && (
