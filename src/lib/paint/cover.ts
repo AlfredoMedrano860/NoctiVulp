@@ -74,9 +74,6 @@ export function paintCover(ctx: Ctx, project: CoverInput, index: number, labels:
   }
 
   const margin = 56
-  ctx.strokeStyle = 'rgba(244, 237, 230, 0.1)'
-  ctx.lineWidth = 2
-  ctx.strokeRect(margin, margin, w - margin * 2, h - margin * 2)
 
   const cells = stamp(rand)
   const cell = h * 0.096
