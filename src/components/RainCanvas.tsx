@@ -1,179 +1,75 @@
 import { useEffect, useRef } from 'react'
 import { firstInteraction } from '../lib/interaction'
 
-interface Drop {
-  x: number
-  y: number
-  len: number
-  speed: number
-  // índice del grupo de opacidad: las gotas se dibujan por grupos en un solo trazo
-  layer: number
-}
+const TILE = 512
 
-interface Ember {
-  x: number
-  y: number
-  r: number
-  speed: number
-  drift: number
-  life: number
-}
+// [opacidad, gotas por mosaico, segundos por vuelta]: las tenues caen lento y las brillantes rápido.
+const RAIN_LAYERS: [number, number, number][] = [
+  [0.1, 8, 1.25],
+  [0.18, 7, 0.85],
+  [0.28, 6, 0.6],
+]
+const EMBERS_PER_TILE = 5
 
-const RAIN_LAYERS = [0.1, 0.18, 0.28]
+const svgUrl = (body: string) =>
+  `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${TILE}' height='${TILE}'>${body}</svg>`)}")`
 
-// 30 fps alcanzan para la lluvia; sin tope, en pantallas de 120–144 Hz dibujaría el doble o más.
-const FRAME_MS = 1000 / 30
+const round = (n: number) => Math.round(n * 10) / 10
 
-// Brasa con brillo pre-renderizada: dibujar una imagen es mucho más barato que shadowBlur.
-function makeEmberSprite() {
-  const size = 32
-  const c = document.createElement('canvas')
-  c.width = c.height = size
-  const ctx = c.getContext('2d')
-  if (ctx) {
-    const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-    g.addColorStop(0, 'rgba(255, 200, 140, 1)')
-    g.addColorStop(0.2, 'rgba(255, 107, 0, 0.9)')
-    g.addColorStop(1, 'rgba(255, 107, 0, 0)')
-    ctx.fillStyle = g
-    ctx.fillRect(0, 0, size, size)
+// Cada gota se dibuja también en las copias vecinas para que el mosaico empalme sin cortes.
+function rainTile(alpha: number, count: number) {
+  let d = ''
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * TILE
+    const y = Math.random() * TILE
+    const len = 12 + Math.random() * 28
+    for (const dx of [-TILE, 0, TILE]) {
+      for (const dy of [-TILE, 0, TILE]) {
+        d += `M${round(x + dx)} ${round(y + dy)}l${round(-len * 0.25)} ${round(len)}`
+      }
+    }
   }
-  return c
+  return svgUrl(`<path d='${d}' stroke='rgb(255,179,71)' stroke-opacity='${alpha}' stroke-width='1' stroke-linecap='round' fill='none'/>`)
 }
 
-// Lluvia nocturna estilo Tokyo rain con brasas que suben: el fondo del hero.
+function emberTile() {
+  let dots = ''
+  for (let i = 0; i < EMBERS_PER_TILE; i++) {
+    const x = round(20 + Math.random() * (TILE - 40))
+    const y = round(20 + Math.random() * (TILE - 40))
+    const r = round((0.6 + Math.random() * 1.8) * 4)
+    dots += `<circle cx='${x}' cy='${y}' r='${r}' fill='url(#g)' opacity='${round(0.35 + Math.random() * 0.45)}'/>`
+  }
+  return svgUrl(
+    `<defs><radialGradient id='g'><stop offset='0' stop-color='rgb(255,200,140)'/><stop offset='0.2' stop-color='rgb(255,107,0)' stop-opacity='0.9'/><stop offset='1' stop-color='rgb(255,107,0)' stop-opacity='0'/></radialGradient></defs>${dots}`,
+  )
+}
+
+// Lluvia nocturna con brasas que suben. Los mosaicos son SVG (sin canvas: nada que leer de la
+// GPU) y se mueven con animaciones CSS de transform, que hace la GPU sin tocar el hilo principal.
 export function RainCanvas() {
-  const ref = useRef<HTMLCanvasElement>(null)
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const canvas = ref.current
-    const ctx = canvas?.getContext('2d')
-    if (!canvas || !ctx) return
+    const root = ref.current
+    if (!root) return
+    let cancelled = false
 
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const sprite = makeEmberSprite()
-    let width = 0
-    let height = 0
-    let drops: Drop[] = []
-    let embers: Ember[] = []
-    let frame = 0
-    let timer = 0
-    let last = 0
-
-    const newDrop = (randomY: boolean): Drop => ({
-      x: Math.random() * (width + 200) - 100,
-      y: randomY ? Math.random() * height : -40,
-      len: 12 + Math.random() * 28,
-      speed: 6 + Math.random() * 10,
-      layer: Math.floor(Math.random() * RAIN_LAYERS.length),
-    })
-
-    const newEmber = (randomY: boolean): Ember => ({
-      x: Math.random() * width,
-      y: randomY ? Math.random() * height : height + 10,
-      r: 0.6 + Math.random() * 1.8,
-      speed: 0.3 + Math.random() * 0.8,
-      drift: (Math.random() - 0.5) * 0.4,
-      life: Math.random(),
-    })
-
-    const resize = () => {
-      width = canvas.clientWidth
-      height = canvas.clientHeight
-      const small = width < 760
-      const dpr = small ? 1 : Math.min(window.devicePixelRatio || 1, 1.5)
-      canvas.width = width * dpr
-      canvas.height = height * dpr
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      const density = Math.min(100, Math.round((width * height) / (small ? 22000 : 15000)))
-      drops = Array.from({ length: density }, () => newDrop(true))
-      embers = Array.from({ length: Math.round(density / 5) }, () => newEmber(true))
-      if (reduceMotion) draw()
-    }
-
-    const draw = () => {
-      ctx.clearRect(0, 0, width, height)
-      ctx.lineCap = 'round'
-      ctx.lineWidth = 1
-      RAIN_LAYERS.forEach((alpha, layer) => {
-        ctx.strokeStyle = `rgba(255, 179, 71, ${alpha})`
-        ctx.beginPath()
-        for (const d of drops) {
-          if (d.layer !== layer) continue
-          ctx.moveTo(d.x, d.y)
-          ctx.lineTo(d.x - d.len * 0.25, d.y + d.len)
-        }
-        ctx.stroke()
+    const build = () => {
+      if (cancelled) return
+      const tiles = [...RAIN_LAYERS.map(([alpha, count]) => rainTile(alpha, count)), emberTile()]
+      root.querySelectorAll<HTMLElement>('.rain__layer').forEach((layer, i) => {
+        layer.style.backgroundImage = tiles[i]
       })
-      for (const e of embers) {
-        ctx.globalAlpha = 0.8 * Math.sin(e.life * Math.PI)
-        const s = e.r * 8
-        ctx.drawImage(sprite, e.x - s / 2, e.y - s / 2, s, s)
-      }
-      ctx.globalAlpha = 1
+      root.classList.add('is-ready')
     }
 
-    // Duerme entre cuadros: pedir un requestAnimationFrame en cada vuelta obligaría al
-    // navegador a recorrer todo su ciclo de dibujo en cada frame de la pantalla.
-    const next = () => {
-      timer = window.setTimeout(() => (frame = requestAnimationFrame(step)), FRAME_MS - 6)
-    }
-
-    const step = (now: number) => {
-      next()
-      // normaliza a 60 fps para que la velocidad no dependa de la pantalla
-      const k = last ? Math.min((now - last) / 16.7, 3) : 1
-      last = now
-      for (let i = 0; i < drops.length; i++) {
-        const d = drops[i]
-        d.y += d.speed * k
-        d.x -= d.speed * 0.25 * k
-        if (d.y > height) drops[i] = newDrop(false)
-      }
-      for (let i = 0; i < embers.length; i++) {
-        const e = embers[i]
-        e.y -= e.speed * k
-        e.x += e.drift * k
-        e.life += 0.003 * k
-        if (e.life >= 1 || e.y < -10) embers[i] = { ...newEmber(false), life: 0 }
-      }
-      draw()
-    }
-
-    // Solo anima cuando el hero se ve y la pestaña está activa.
-    let inView = true
-    let started = false
-    const sync = () => {
-      const shouldRun = started && inView && !document.hidden && !reduceMotion
-      cancelAnimationFrame(frame)
-      window.clearTimeout(timer)
-      if (shouldRun) {
-        last = 0
-        frame = requestAnimationFrame(step)
-      }
-    }
-    const io = new IntersectionObserver(([entry]) => {
-      inView = entry.isIntersecting
-      sync()
-    })
-    io.observe(canvas)
-    document.addEventListener('visibilitychange', sync)
-
-    const ro = new ResizeObserver(resize)
-    ro.observe(canvas)
-    resize()
-
-    const begin = () => {
-      started = true
-      sync()
-    }
     // En pantallas chicas la lluvia espera a la primera interacción: no compite con la carga.
     const hasIdle = typeof requestIdleCallback === 'function'
     let idle: number | ReturnType<typeof setTimeout> = 0
-    let cancelled = false
     const schedule = () => {
       if (cancelled) return
-      idle = hasIdle ? requestIdleCallback(begin, { timeout: 3000 }) : setTimeout(begin, 1500)
+      idle = hasIdle ? requestIdleCallback(build, { timeout: 3000 }) : setTimeout(build, 1500)
     }
     if (window.innerWidth < 760 || window.matchMedia('(pointer: coarse)').matches) void firstInteraction.then(schedule)
     else schedule()
@@ -182,13 +78,15 @@ export function RainCanvas() {
       cancelled = true
       if (hasIdle) cancelIdleCallback(idle as number)
       else clearTimeout(idle)
-      cancelAnimationFrame(frame)
-      window.clearTimeout(timer)
-      io.disconnect()
-      ro.disconnect()
-      document.removeEventListener('visibilitychange', sync)
     }
   }, [])
 
-  return <canvas ref={ref} className="rain-canvas" aria-hidden="true" />
+  return (
+    <div ref={ref} className="rain-canvas" aria-hidden="true">
+      {RAIN_LAYERS.map(([, , seconds], i) => (
+        <div key={i} className="rain__layer rain__layer--drops" style={{ animationDuration: `${seconds}s` }} />
+      ))}
+      <div className="rain__layer rain__layer--embers" />
+    </div>
+  )
 }
