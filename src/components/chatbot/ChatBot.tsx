@@ -46,21 +46,15 @@ function CloseIcon({ size = 20 }: { size?: number }) {
   )
 }
 
-// Carita del bot: redonda, del color ámbar/fuego de las alas de la polilla, con ojos que parpadean.
+// Carita del bot: redonda, del color ámbar de las alas de la polilla, solo con ojos.
 function BotFace({ size = 30, className = '' }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" className={`chat__face ${className}`} aria-hidden="true">
       <circle cx="16" cy="16" r="14" fill="var(--amber)" />
-      <path d="M2.6 19.5 A14 14 0 0 0 29.4 19.5 A14 10 0 0 1 2.6 19.5 Z" fill="var(--fire)" opacity="0.55" />
-      <circle cx="8.6" cy="19.4" r="2.2" fill="var(--fire)" opacity="0.75" />
-      <circle cx="23.4" cy="19.4" r="2.2" fill="var(--fire)" opacity="0.75" />
       <g className="chat__eyes">
-        <ellipse cx="11.2" cy="14.2" rx="2.4" ry="3.1" fill="var(--bg)" />
-        <ellipse cx="20.8" cy="14.2" rx="2.4" ry="3.1" fill="var(--bg)" />
-        <circle cx="12" cy="13.1" r="0.9" fill="#fff" />
-        <circle cx="21.6" cy="13.1" r="0.9" fill="#fff" />
+        <ellipse cx="11.2" cy="16" rx="2.4" ry="3.4" fill="var(--bg)" />
+        <ellipse cx="20.8" cy="16" rx="2.4" ry="3.4" fill="var(--bg)" />
       </g>
-      <path d="M13.2 20.6 Q16 23 18.8 20.6" stroke="var(--bg)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
     </svg>
   )
 }
