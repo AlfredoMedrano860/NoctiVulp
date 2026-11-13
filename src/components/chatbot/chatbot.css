@@ -1,6 +1,6 @@
 /* Chatbot "Nocti" (ChatBot.tsx). Hecho con piezas del sitio:
    - .chat__launcher  gemelo del botón de accesibilidad (redondo, oscuro, borde de fuego),
-                      abajo a la izquierda, con la polilla del logo, que aletea al pasar el mouse.
+                      abajo a la izquierda, con la carita del bot.
    - .chat__panel     ventana de terminal como la línea "$ open github.com/…" del hero: barra
                       con tres puntos, preguntas como comandos ($) y respuestas como salida.
    - .chat__hint      aviso de la primera visita, en el mismo estilo de terminal. */
